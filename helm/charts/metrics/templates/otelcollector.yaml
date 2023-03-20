@@ -1,0 +1,104 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.name }}
+spec:
+
+  # Mode
+  mode: {{ .Values.mode }}
+
+  # Number of replicas
+  replicas: 2
+
+  # Service Account
+  serviceAccount: {{ .Values.name }}
+
+  # Target allocator
+  targetAllocator:
+    enabled: true
+    serviceAccount: {{ .Values.name }}
+    prometheusCR:
+      enabled: false
+
+  # Pod annotations
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.prometheus.port }}"
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.prometheus.port }}
+      targetPort: {{ .Values.prometheus.port }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otelcollector'
+              scrape_interval: 10s
+              static_configs:
+              - targets:
+                - 0.0.0.0:{{ .Values.prometheus.port }}
+
+    processors:
+      batch:
+      cumulativetodelta:
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.cluster.name
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+
+    exporters:
+      otlp:
+        endpoint: {{ .Values.newrelicOtlpEndpoint }}
+        tls:
+          insecure: false
+        headers:
+          api-key: {{ .Values.newrelicLicenseKey }}
+      logging:
+        verbosity: detailed
+
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - prometheus
+            - otlp
+          processors:
+            - k8sattributes
+            - batch
+            - memory_limiter
+            - cumulativetodelta
+          exporters:
+            - otlp
+            - logging
+      telemetry:
+        metrics:
+          address: 0.0.0.0:{{ .Values.prometheus.port }}

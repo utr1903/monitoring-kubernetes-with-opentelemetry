@@ -1,0 +1,17 @@
+### Variables
+
+# Name
+name: "otelcollector"
+
+# Mode
+mode: "statefulset"
+
+# Prometheus
+prometheus:
+  port: 9464
+
+# New Relic OTLP endpoint
+newrelicOtlpEndpoint: "otlp.nr-data.net:4317"
+
+# New Relic license key
+newrelicLicenseKey: ""
