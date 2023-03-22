@@ -32,15 +32,13 @@ spec:
       port: {{ .Values.prometheus.port }}
       targetPort: {{ .Values.prometheus.port }}
 
+  # Image
+  image: otel/opentelemetry-collector-contrib:0.73.0
+
   # Otel configuration
   config: |
     receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
+
       prometheus:
         config:
           scrape_configs:
@@ -50,9 +48,43 @@ spec:
               - targets:
                 - 0.0.0.0:{{ .Values.prometheus.port }}
 
+            - job_name: 'kubernetes-nodes-cadvisor'
+
+              scheme: https
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+              kubernetes_sd_configs:
+                - role: node
+
+              relabel_configs:
+                # - action: labelmap
+                #   regex: __meta_kubernetes_node_label_(.+)
+                #   # replacement: $$1
+                #   # separator: ;
+                - target_label: __address__
+                  replacement: kubernetes.default.svc:443
+                - source_labels: [__meta_kubernetes_node_name]
+                  regex: (.+)
+                  target_label: __metrics_path__
+                  replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
+
     processors:
+
       batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 70
+         spike_limit_percentage: 30
+
       cumulativetodelta:
+
       k8sattributes:
         extract:
           metadata:
@@ -70,27 +102,38 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
-      memory_limiter:
-        check_interval: 5s
-        limit_percentage: 80
-        spike_limit_percentage: 25
 
     exporters:
+
       otlp:
         endpoint: {{ .Values.newrelicOtlpEndpoint }}
         tls:
           insecure: false
         headers:
           api-key: {{ .Values.newrelicLicenseKey }}
+
       logging:
-        verbosity: detailed
+        # verbosity: detailed
+
+    extensions:
+
+      memory_ballast:
+        size_in_percentage: 20
+
+      k8s_observer:
+        auth_type: serviceAccount
+        observe_pods: true
+        observe_nodes: true
 
     service:
+      extensions:
+        - memory_ballast
+        # - k8s_observer
       pipelines:
         metrics:
           receivers:
+            # - receiver_creator
             - prometheus
-            - otlp
           processors:
             - k8sattributes
             - batch
@@ -98,7 +141,9 @@ spec:
             - cumulativetodelta
           exporters:
             - otlp
-            - logging
+            # - logging
       telemetry:
+        # logs:
+        #   level: DEBUG
         metrics:
           address: 0.0.0.0:{{ .Values.prometheus.port }}

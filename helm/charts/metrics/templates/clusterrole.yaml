@@ -3,38 +3,70 @@ kind: ClusterRole
 metadata:
   name: {{ .Values.name }}
 rules:
-  - apiGroups: [""]
+  - apiGroups:
+    - ""
     resources:
+      - events
+      - namespaces
+      - namespaces/status
       - nodes
+      - nodes/spec
+      - nodes/stats
+      - nodes/proxy
       - nodes/metrics
+      - pods
+      - pods/status
+      - replicationcontrollers
+      - replicationcontrollers/status
+      - resourcequotas
       - services
       - endpoints
-      - pods
-    verbs:
-      - "get"
-      - "list"
-      - "watch"
-  - apiGroups: [""]
-    resources:
-      - configmaps
-    verbs: ["get"]
-  - apiGroups:
-      - discovery.k8s.io
-    resources:
-      - endpointslices
-    verbs:
-      - "get"
-      - "list"
-      - "watch"
-  - apiGroups:
-      - networking.k8s.io
-    resources:
       - ingresses
+      - configmaps
     verbs:
-      - "get"
-      - "list"
-      - "watch"
+      - get
+      - list
+      - watch
+  - apiGroups:
+    - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
   - nonResourceURLs:
       - "/metrics"
+      - "/metrics/cadvisor"
     verbs:
       - "get"
