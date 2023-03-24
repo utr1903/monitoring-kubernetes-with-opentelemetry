@@ -9,7 +9,6 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 declare -A otelcollector
 otelcollector["name"]="otelcollectorsts"
 otelcollector["namespace"]="monitoring"
-otelcollector["mode"]="statefulset"
 otelcollector["prometheusPort"]=8888
 
 ###################
