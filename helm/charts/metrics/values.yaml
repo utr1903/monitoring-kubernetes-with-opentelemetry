@@ -119,119 +119,29 @@ resources:
     cpu: 256m
     memory: 512Mi
 
-# Environment variables
-env:
-  - name: TEST
-    value: asdasdasd
+# New Relic account configuration
+newrelic:
+  # OPS team which is responsible for the cluster and common apps
+  # running on it.
+  opsteam:
+    endpoint: "otlp.nr-data.net:4317"
+    licenseKey: ""
+    namespaces: []
 
-# Open Telemetry collector configuration
-config:
-  # Receivers
-  receivers:
-    # Prometheus
-    prometheus:
-      enabled: true
-      config:
-        scrape_configs:
-          # Scrape own metrics
-          - job_name: 'otelcollector'
-            scrape_interval: 10s
-            static_configs:
-            - targets:
-              - 0.0.0.0:{{ .Values.prometheus.port }}
-          # Scrape cadvisor metrics
-          - job_name: 'kubernetes-nodes-cadvisor'
-            scheme: https
-            tls_config:
-              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-              insecure_skip_verify: true
-            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-            kubernetes_sd_configs:
-              - role: node
-            relabel_configs:
-              # - action: labelmap
-              #   regex: __meta_kubernetes_node_label_(.+)
-              #   # replacement: $$1
-              #   # separator: ;
-              - target_label: __address__
-                replacement: kubernetes.default.svc:443
-              - source_labels: [__meta_kubernetes_node_name]
-                regex: (.+)
-                target_label: __metrics_path__
-                replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
-  # Processors
-  processors:
-    # Batch received telemetry
-    batch:
-      send_batch_max_size: 1000
-      timeout: 30s
-      send_batch_size : 800
-    # Memory limiter for controlling memory limits
-    memory_limiter:
-        check_interval: 1s
-        limit_percentage: 70
-        spike_limit_percentage: 30
-    # Cumulative to delta
-    cumulativetodelta:
-    # Kubernetes attributes
-    k8sattributes:
-      extract:
-        metadata:
-        - k8s.cluster.name
-        - k8s.node.name
-        - k8s.namespace.name
-        - k8s.pod.name
-      passthrough: false
-      pod_association:
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.ip
-      - sources:
-        - from: resource_attribute
-          name: k8s.pod.uid
-      - sources:
-        - from: connection
-  # Exporters
-  exporters:
-    # OTLP
-    otlp:
-      endpoint: asd
-      tls:
-        insecure: false
-      headers:
-        api-key: asd
-    # Enable telemetry data logging of the collector
-    logging:
-      verbosity: detailed
-  # Extensions
-  extensions:
-    # Memory ballast
-    memory_ballast:
-      size_in_percentage: 20
-  # Service
-  service:
-    extensions:
-      - memory_ballast
-    pipelines:
-      metrics/team1:
-        receivers:
-          - prometheus
-        processors:
-          - k8sattributes
-          - batch
-          - memory_limiter
-          - cumulativetodelta
-        exporters:
-          - otlp
-          # - logging
-    telemetry:
-      metrics:
-        address: 0.0.0.0:{{ .Values.prometheus.port }}
-      # logs:
-      #   level: DEBUG
-
-# New Relic OTLP endpoint
-newrelicOtlpEndpoint: "otlp.nr-data.net:4317"
-
-# New Relic license key
-newrelicLicenseKey: ""
+  # # If you want to send the namespaced telemetry data from the
+  # # cluster to the accounts of the individual dev teams
+  # # comment in below.
+  # # Dev team 1 which is responsible for its own apps running
+  # # in a specific namespace.
+  # devteam1:
+  #   endpoint: "otlp.nr-data.net:4317"
+  #   licenseKey: ""
+  #   namespaces:
+  #     - devteam1
+  # # Dev team 2 which is responsible for its own apps running
+  # # in a specific namespace.
+  # devteam2:
+  #   endpoint: "otlp.nr-data.net:4317"
+  #   licenseKey: ""
+  #   namespaces:
+  #     - devteam2

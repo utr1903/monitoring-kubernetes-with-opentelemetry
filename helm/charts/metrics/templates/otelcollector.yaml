@@ -26,21 +26,26 @@ spec:
     - name: prometheus
       protocol: TCP
       port: {{ .Values.ports.prometheus.port }}
-      targetPort: {{ .Values.prometheus.targetPort }}
+      targetPort: {{ .Values.ports.prometheus.targetPort }}
 
   # Image
   image: otel/opentelemetry-collector-contrib:0.73.0
 
   # Environment variables
   env:
-    {{- with .Values.env }}
-    {{- . | toYaml | nindent 4 }}
-    {{- end }}
+  {{- range $teamName, $teamInfo := .Values.newrelic }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $.Values.name }}
+          key: {{ $teamName }}
+  {{- end }}
 
   # Otel configuration
   config: |
     receivers:
-
       prometheus:
         config:
           scrape_configs:
@@ -48,7 +53,7 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.prometheus.port }}
+                - 0.0.0.0:{{ .Values.ports.prometheus.port }}
 
             - job_name: 'kubernetes-nodes-cadvisor'
 
@@ -74,19 +79,15 @@ spec:
                   replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
 
     processors:
-
       batch:
         send_batch_max_size: 1000
         timeout: 30s
         send_batch_size : 800
-
       memory_limiter:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
-
       cumulativetodelta:
-
       k8sattributes:
         extract:
           metadata:
@@ -104,98 +105,54 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
-
-      filter/devteam1:
+      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
         error_mode: ignore
         metrics:
           datapoint:
-            - 'attributes["namespace"] != "devteam1"'
-
-      filter/devteam2:
-        error_mode: ignore
-        metrics:
-          datapoint:
-            - 'attributes["namespace"] != "devteam2"'
+          {{- range $namespace := $teamInfo.namespaces }}
+            - 'attributes["namespace"] != "{{ $namespace }}"'
+          {{- end }}
+      {{- end }}
+      {{- end }}
 
     exporters:
-
-      otlp/opsteam:
-        endpoint: {{ .Values.newrelicOtlpEndpoint }}
+    {{- range $teamName, $teamInfo := .Values.newrelic }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
-          api-key: {{ .Values.newrelicLicenseKey }}
-
-      otlp/devteam1:
-        endpoint: {{ .Values.newrelicOtlpEndpointDevTeam1 }}
-        tls:
-          insecure: false
-        headers:
-          api-key: {{ .Values.newrelicLicenseKeyDevTeam1 }}
-
-      otlp/devteam2:
-        endpoint: {{ .Values.newrelicOtlpEndpointDevTeam2 }}
-        tls:
-          insecure: false
-        headers:
-          api-key: {{ .Values.newrelicLicenseKeyDevTeam2 }}
-
+          api-key: ${env:{{ $teamName }}-licenseKey}
+    {{- end }}
       logging:
         # verbosity: detailed
 
     extensions:
-
       memory_ballast:
         size_in_percentage: 20
-
-      k8s_observer:
-        auth_type: serviceAccount
-        observe_pods: true
-        observe_nodes: true
 
     service:
       extensions:
         - memory_ballast
-        # - k8s_observer
       pipelines:
-        metrics/opsteam:
+      {{- range $teamName, $teamInfo := .Values.newrelic }}
+        metrics/{{ $teamName }}:
           receivers:
-            # - receiver_creator
             - prometheus
           processors:
             - k8sattributes
             - batch
             - memory_limiter
             - cumulativetodelta
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
           exporters:
-            - otlp/opsteam
+            - otlp/{{ $teamName }}
             # - logging
-        # metrics/team1:
-        #   receivers:
-        #     # - receiver_creator
-        #     - prometheus
-        #   processors:
-        #     - k8sattributes
-        #     - batch
-        #     - memory_limiter
-        #     - cumulativetodelta
-        #     - filter/team1
-        #   exporters:
-        #     - otlp/team1
-        #     # - logging
-        # metrics/team2:
-        #   receivers:
-        #     # - receiver_creator
-        #     - prometheus
-        #   processors:
-        #     - k8sattributes
-        #     - batch
-        #     - memory_limiter
-        #     - cumulativetodelta
-        #     - filter/team2
-        #   exporters:
-        #     - otlp/team2
-        #     # - logging
+      {{- end }}
       telemetry:
         # logs:
         #   level: DEBUG
