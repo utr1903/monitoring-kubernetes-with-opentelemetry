@@ -30,4 +30,4 @@ helm upgrade ${otelcollector[name]} \
   --set ports.prometheus.port=${otelcollector[prometheusPort]} \
   --set newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set newrelic.opsteam.licenseKey=$NEWRELIC_LICENSE_KEY \
-  "../charts/metrics"
+  "../charts/statefulset"
