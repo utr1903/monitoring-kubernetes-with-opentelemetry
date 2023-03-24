@@ -1,0 +1,178 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+
+  # Mode
+  mode: "daemonset"
+
+  # Service Account
+  serviceAccount: {{ .Values.name }}
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.ports.prometheus.port }}
+      targetPort: {{ .Values.ports.prometheus.targetPort }}
+
+  # Image
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+  # Environment variables
+  env:
+  {{- range $teamName, $teamInfo := .Values.newrelic }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $.Values.name }}
+          key: {{ $teamName }}
+  {{- end }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      filelog:
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        operators:
+        - id: get-format
+          routes:
+          - expr: body matches "^\\{"
+            output: parser-docker
+          - expr: body matches "^[^ Z]+ "
+            output: parser-crio
+          - expr: body matches "^[^ Z]+Z"
+            output: parser-containerd
+          type: router
+        - id: parser-crio
+          output: extract_metadata_from_filepath
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: "2006-01-02T15:04:05.000000000-07:00"
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - id: parser-containerd
+          output: extract_metadata_from_filepath
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: regex_parser
+        - id: parser-docker
+          output: extract_metadata_from_filepath
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: json_parser
+        - id: extract_metadata_from_filepath
+          parse_from: attributes["log.file.path"]
+          regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
+          type: regex_parser
+        - from: attributes.stream
+          to: attributes["log.iostream"]
+          type: move
+        - from: attributes.container_name
+          to: resource["k8s.container.name"]
+          type: move
+        - from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+          type: move
+        - from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+          type: move
+        - from: attributes.restart_count
+          to: resource["k8s.container.restart_count"]
+          type: move
+        - from: attributes.uid
+          to: resource["k8s.pod.uid"]
+          type: move
+        - from: attributes.log
+          to: body
+          type: move
+        start_at: end
+
+    processors:
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
+      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{- range $namespace := $teamInfo.namespaces }}
+            - 'attributes["k8s.namespace.name"] != "{{ $namespace }}"'
+          {{- end }}
+      {{- end }}
+      {{- end }}
+
+    exporters:
+    {{- range $teamName, $teamInfo := .Values.newrelic }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+    {{- end }}
+      logging:
+        # verbosity: detailed
+
+    extensions:
+      memory_ballast:
+        size_in_percentage: 20
+
+    service:
+      extensions:
+        - memory_ballast
+      pipelines:
+      {{- range $teamName, $teamInfo := .Values.newrelic }}
+        logs:
+          receivers:
+            - filelog
+          processors:
+            - k8sattributes
+            - batch
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+      {{- end }}
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        metrics:
+          address: 0.0.0.0:{{ .Values.ports.prometheus.targetPort }}
