@@ -2,10 +2,11 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
   name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
 spec:
 
   # Mode
-  mode: {{ .Values.mode }}
+  mode: "statefulset"
 
   # Number of replicas
   replicas: 2
@@ -20,20 +21,21 @@ spec:
     prometheusCR:
       enabled: false
 
-  # Pod annotations
-  podAnnotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "{{ .Values.prometheus.port }}"
-
   # Ports to expose per service
   ports:
     - name: prometheus
       protocol: TCP
-      port: {{ .Values.prometheus.port }}
-      targetPort: {{ .Values.prometheus.port }}
+      port: {{ .Values.ports.prometheus.port }}
+      targetPort: {{ .Values.prometheus.targetPort }}
 
   # Image
   image: otel/opentelemetry-collector-contrib:0.73.0
+
+  # Environment variables
+  env:
+    {{- with .Values.env }}
+    {{- . | toYaml | nindent 4 }}
+    {{- end }}
 
   # Otel configuration
   config: |
@@ -80,8 +82,8 @@ spec:
 
       memory_limiter:
          check_interval: 1s
-         limit_percentage: 70
-         spike_limit_percentage: 30
+         limit_percentage: 80
+         spike_limit_percentage: 25
 
       cumulativetodelta:
 
@@ -103,9 +105,28 @@ spec:
         - sources:
           - from: connection
 
+      filter/team1:
+        error_mode: ignore
+        metrics:
+          datapoint:
+            - 'attributes["namespace"] != "monitoring"'
+
+      filter/team2:
+        error_mode: ignore
+        metrics:
+          datapoint:
+            - 'attributes["namespace"] != "kube-system"'
+
     exporters:
 
-      otlp:
+      otlp/team1:
+        endpoint: {{ .Values.newrelicOtlpEndpoint }}
+        tls:
+          insecure: false
+        headers:
+          api-key: {{ .Values.newrelicLicenseKey }}
+
+      otlp/team2:
         endpoint: {{ .Values.newrelicOtlpEndpoint }}
         tls:
           insecure: false
@@ -130,7 +151,7 @@ spec:
         - memory_ballast
         # - k8s_observer
       pipelines:
-        metrics:
+        metrics/team1:
           receivers:
             # - receiver_creator
             - prometheus
@@ -139,11 +160,25 @@ spec:
             - batch
             - memory_limiter
             - cumulativetodelta
+            - filter/team1
           exporters:
-            - otlp
+            - otlp/team1
+            # - logging
+        metrics/team2:
+          receivers:
+            # - receiver_creator
+            - prometheus
+          processors:
+            - k8sattributes
+            - batch
+            - memory_limiter
+            - cumulativetodelta
+            - filter/team2
+          exporters:
+            - otlp/team2
             # - logging
       telemetry:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.prometheus.port }}
+          address: 0.0.0.0:{{ .Values.ports.prometheus.targetPort }}
