@@ -9,8 +9,8 @@ image:
   repository: otel/opentelemetry-collector-contrib
   # Image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  # Image tag
+  tag: "0.74.0"
 
 # Amount of replicas
 replicas: 2

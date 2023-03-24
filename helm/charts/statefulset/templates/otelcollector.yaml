@@ -29,7 +29,8 @@ spec:
       targetPort: {{ .Values.ports.prometheus.targetPort }}
 
   # Image
-  image: otel/opentelemetry-collector-contrib:0.73.0
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
 
   # Environment variables
   env:
@@ -91,7 +92,6 @@ spec:
       k8sattributes:
         extract:
           metadata:
-          - k8s.cluster.name
           - k8s.node.name
           - k8s.namespace.name
           - k8s.pod.name
