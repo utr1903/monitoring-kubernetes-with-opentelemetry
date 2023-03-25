@@ -6,20 +6,10 @@ metadata:
 spec:
 
   # Mode
-  mode: "statefulset"
-
-  # Number of replicas
-  replicas: 2
+  mode: "daemonset"
 
   # Service Account
   serviceAccount: {{ .Values.name }}
-
-  # Target allocator
-  targetAllocator:
-    enabled: true
-    serviceAccount: {{ .Values.name }}
-    prometheusCR:
-      enabled: false
 
   # Ports to expose per service
   ports:
@@ -31,6 +21,16 @@ spec:
   # Image
   image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
   imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+  # Volumes and volume mounts
+  volumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+  volumes:
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
 
   # Environment variables
   env:
@@ -47,37 +47,68 @@ spec:
   # Otel configuration
   config: |
     receivers:
-      prometheus:
-        config:
-          scrape_configs:
-            - job_name: 'otelcollector'
-              scrape_interval: 10s
-              static_configs:
-              - targets:
-                - 0.0.0.0:{{ .Values.ports.prometheus.port }}
-
-            - job_name: 'kubernetes-nodes-cadvisor'
-
-              scheme: https
-              tls_config:
-                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-                insecure_skip_verify: true
-              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-
-              kubernetes_sd_configs:
-                - role: node
-
-              relabel_configs:
-                # - action: labelmap
-                #   regex: __meta_kubernetes_node_label_(.+)
-                #   # replacement: $$1
-                #   # separator: ;
-                - target_label: __address__
-                  replacement: kubernetes.default.svc:443
-                - source_labels: [__meta_kubernetes_node_name]
-                  regex: (.+)
-                  target_label: __metrics_path__
-                  replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
+      filelog:
+        start_at: end
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        operators:
+        - id: get-format
+          routes:
+          - expr: body matches "^\\{"
+            output: parser-docker
+          - expr: body matches "^[^ Z]+ "
+            output: parser-crio
+          - expr: body matches "^[^ Z]+Z"
+            output: parser-containerd
+          type: router
+        - id: parser-crio
+          output: extract_metadata_from_filepath
+          regex: ^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: "2006-01-02T15:04:05.000000000-07:00"
+            layout_type: gotime
+            parse_from: attributes.time
+          type: regex_parser
+        - id: parser-containerd
+          output: extract_metadata_from_filepath
+          regex: ^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: regex_parser
+        - id: parser-docker
+          output: extract_metadata_from_filepath
+          timestamp:
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+            parse_from: attributes.time
+          type: json_parser
+        - id: extract_metadata_from_filepath
+          parse_from: attributes["log.file.path"]
+          regex: ^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$
+          type: regex_parser
+        - from: attributes.stream
+          to: attributes["log.iostream"]
+          type: move
+        - from: attributes.container_name
+          to: resource["k8s.container.name"]
+          type: move
+        - from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+          type: move
+        - from: attributes.pod_name
+          to: resource["k8s.pod.name"]
+          type: move
+        - from: attributes.restart_count
+          to: resource["k8s.container.restart_count"]
+          type: move
+        - from: attributes.uid
+          to: resource["k8s.pod.uid"]
+          type: move
+        - from: attributes.log
+          to: body
+          type: move
 
     processors:
       batch:
@@ -88,7 +119,6 @@ spec:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
-      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
@@ -112,7 +142,7 @@ spec:
         metrics:
           datapoint:
           {{- range $namespace := $teamInfo.namespaces }}
-            - 'attributes["namespace"] != "{{ $namespace }}"'
+            - 'attributes["k8s.namespace.name"] != "{{ $namespace }}"'
           {{- end }}
       {{- end }}
       {{- end }}
@@ -127,7 +157,7 @@ spec:
           api-key: ${env:{{ $teamName }}-licenseKey}
     {{- end }}
       logging:
-        # verbosity: detailed
+        verbosity: detailed
 
     extensions:
       memory_ballast:
@@ -138,14 +168,12 @@ spec:
         - memory_ballast
       pipelines:
       {{- range $teamName, $teamInfo := .Values.newrelic }}
-        metrics/{{ $teamName }}:
+        logs/{{ $teamName }}:
           receivers:
-            - prometheus
+            - filelog
           processors:
             - k8sattributes
             - batch
-            - memory_limiter
-            - cumulativetodelta
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}

@@ -7,9 +7,8 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 # otelcollector
 declare -A otelcollector
-otelcollector["name"]="otelcollectorsts"
+otelcollector["name"]="otelcollectords"
 otelcollector["namespace"]="monitoring"
-otelcollector["mode"]="statefulset"
 otelcollector["prometheusPort"]=8888
 
 ###################
@@ -28,8 +27,7 @@ helm upgrade ${otelcollector[name]} \
   --create-namespace \
   --namespace ${otelcollector[namespace]} \
   --set name=${otelcollector[name]} \
-  --set mode=${otelcollector[mode]} \
   --set ports.prometheus.port=${otelcollector[prometheusPort]} \
   --set newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set newrelic.opsteam.licenseKey=$NEWRELIC_LICENSE_KEY \
-  "../charts/metrics"
+  "../charts/daemonset"

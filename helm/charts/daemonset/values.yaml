@@ -1,7 +1,7 @@
 ### Variables
 
 # Name
-name: "otelcollectorsts"
+name: "otelcollectords"
 
 # Image
 image:
@@ -11,9 +11,6 @@ image:
   pullPolicy: IfNotPresent
   # Image tag
   tag: "0.74.0"
-
-# Amount of replicas
-replicas: 2
 
 # Service account
 serviceAccount:
@@ -28,72 +25,14 @@ clusterRole:
   # Can be used in combination with presets that create a cluster role to add additional rules.
   rules:
     - apiGroups:
-      - ""
+        - ""
       resources:
-        - events
-        - namespaces
-        - namespaces/status
-        - nodes
-        - nodes/spec
-        - nodes/stats
-        - nodes/proxy
-        - nodes/metrics
         - pods
-        - pods/status
-        - replicationcontrollers
-        - replicationcontrollers/status
-        - resourcequotas
-        - services
-        - endpoints
-        - ingresses
-        - configmaps
+        - namespaces
       verbs:
         - get
-        - list
         - watch
-    - apiGroups:
-      - apps
-      resources:
-        - daemonsets
-        - deployments
-        - replicasets
-        - statefulsets
-      verbs:
-        - get
         - list
-        - watch
-    - apiGroups:
-        - extensions
-      resources:
-        - daemonsets
-        - deployments
-        - replicasets
-      verbs:
-        - get
-        - list
-        - watch
-    - apiGroups:
-        - batch
-      resources:
-        - jobs
-        - cronjobs
-      verbs:
-        - get
-        - list
-        - watch
-    - apiGroups:
-        - autoscaling
-      resources:
-        - horizontalpodautoscalers
-      verbs:
-        - get
-        - list
-        - watch
-    - nonResourceURLs:
-        - "/metrics"
-        - "/metrics/cadvisor"
-      verbs:
-        - "get"
 
 clusterRoleBinding:
   # Annotations to add to the clusterRoleBinding
