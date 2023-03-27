@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-sts
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -12,12 +12,12 @@ spec:
   replicas: 2
 
   # Service Account
-  serviceAccount: {{ .Values.name }}
+  serviceAccount: {{ .Values.name }}-sts
 
   # Target allocator
   targetAllocator:
     enabled: true
-    serviceAccount: {{ .Values.name }}
+    serviceAccount: {{ .Values.name }}-sts
     prometheusCR:
       enabled: false
 
@@ -25,22 +25,22 @@ spec:
   ports:
     - name: prometheus
       protocol: TCP
-      port: {{ .Values.ports.prometheus.port }}
-      targetPort: {{ .Values.ports.prometheus.targetPort }}
+      port: {{ .Values.statefulset.ports.prometheus.port }}
+      targetPort: {{ .Values.statefulset.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  image: "{{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}"
+  imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
 
   # Environment variables
   env:
-  {{- range $teamName, $teamInfo := .Values.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}
+          name: {{ $.Values.name }}-sts
           key: {{ $teamName }}
   {{- end }}
 
@@ -54,7 +54,7 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.ports.prometheus.port }}
+                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
 
             - job_name: 'kubernetes-nodes-cadvisor'
 
@@ -105,7 +105,7 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
@@ -118,7 +118,7 @@ spec:
       {{- end }}
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.newrelic }}
+    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
@@ -137,7 +137,7 @@ spec:
       extensions:
         - memory_ballast
       pipelines:
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
         metrics/{{ $teamName }}:
           receivers:
             - prometheus
@@ -157,4 +157,4 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.ports.prometheus.targetPort }}
+          address: 0.0.0.0:{{ .Values.statefulset.ports.prometheus.targetPort }}

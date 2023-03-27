@@ -1,18 +1,18 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.name }}
-  {{- if .Values.clusterRoleBinding.annotations }}
+  name: {{ .Values.name }}-dep
+  {{- if .Values.deployment.clusterRoleBinding.annotations }}
   annotations:
-    {{- range $key, $value := .Values.clusterRoleBinding.annotations }}
+    {{- range $key, $value := .Values.deployment.clusterRoleBinding.annotations }}
     {{- printf "%s: %s" $key (tpl $value $ | quote) | nindent 4 }}
     {{- end }}
   {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-dep
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-dep
   namespace: {{ .Release.Namespace }}

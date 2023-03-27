@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-ds
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -9,18 +9,18 @@ spec:
   mode: "daemonset"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}
+  serviceAccount: {{ .Values.name }}-ds
 
   # Ports to expose per service
   ports:
     - name: prometheus
       protocol: TCP
-      port: {{ .Values.ports.prometheus.port }}
-      targetPort: {{ .Values.ports.prometheus.targetPort }}
+      port: {{ .Values.daemonset.ports.prometheus.port }}
+      targetPort: {{ .Values.daemonset.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  image: "{{ .Values.daemonset.image.repository }}:{{ .Values.daemonset.image.tag }}"
+  imagePullPolicy: {{ .Values.daemonset.image.pullPolicy }}
 
   # Volumes and volume mounts
   volumeMounts:
@@ -34,13 +34,13 @@ spec:
 
   # Environment variables
   env:
-  {{- range $teamName, $teamInfo := .Values.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}
+          name: {{ $.Values.name }}-ds
           key: {{ $teamName }}
   {{- end }}
 
@@ -135,7 +135,7 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
@@ -148,7 +148,7 @@ spec:
       {{- end }}
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.newrelic }}
+    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
@@ -167,7 +167,7 @@ spec:
       extensions:
         - memory_ballast
       pipelines:
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
         logs/{{ $teamName }}:
           receivers:
             - filelog
@@ -185,4 +185,4 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.ports.prometheus.targetPort }}
+          address: 0.0.0.0:{{ .Values.daemonset.ports.prometheus.targetPort }}

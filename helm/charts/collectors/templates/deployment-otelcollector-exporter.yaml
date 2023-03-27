@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-exporter
+  name: {{ .Values.name }}-dep-exp
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -9,28 +9,28 @@ spec:
   mode: "deployment"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}
+  serviceAccount: {{ .Values.name }}-dep
 
   # Ports to expose per service
   ports:
     - name: prometheus
       protocol: TCP
-      port: {{ .Values.ports.prometheus.port }}
-      targetPort: {{ .Values.ports.prometheus.targetPort }}
+      port: {{ .Values.deployment.ports.prometheus.port }}
+      targetPort: {{ .Values.deployment.ports.prometheus.targetPort }}
 
   # Image
-  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+  imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
 
   # Environment variables
   env:
-  {{- range $teamName, $teamInfo := .Values.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}
+          name: {{ $.Values.name }}-dep
           key: {{ $teamName }}
   {{- end }}
 
@@ -51,7 +51,7 @@ spec:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
@@ -64,7 +64,7 @@ spec:
       {{- end }}
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.newrelic }}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
@@ -83,7 +83,7 @@ spec:
       extensions:
         - memory_ballast
       pipelines:
-      {{- range $teamName, $teamInfo := .Values.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
         traces/{{ $teamName }}:
           receivers:
             - otlp
@@ -101,4 +101,4 @@ spec:
         # logs:
         #   level: DEBUG
         metrics:
-          address: 0.0.0.0:{{ .Values.ports.prometheus.targetPort }}
+          address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}

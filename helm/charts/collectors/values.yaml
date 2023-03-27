@@ -1,0 +1,341 @@
+### Variables
+
+# Name
+name: "nr-otel"
+
+### DEPLOYMENT CONFIG ###
+# This configuration creates 2 collectors as Kubernetes deployments:
+# - receiver
+# - exporter
+
+## Receiver collector
+# It is responsible for gathering the spans from
+# all of the applications and routing them to the exporter collector
+# according to the trace IDs. This methodology guarantees that all of
+# the spans belonging to particular trace will be sent to one instance
+# of a collector which again guarentees a correct sampling.
+
+## Exporter collector
+# It is responsible to:
+# - gather the spans from the receiver collector
+# - sample them
+# - filter & forward them to corresponding New Relic accounts
+
+# Both collectors can be scaled out/in independently from each other
+deployment:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.74.0"
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+        verbs:
+          - get
+          - watch
+          - list
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # New Relic account configuration
+  newrelic:
+    # OPS team which is responsible for the cluster and common apps
+    # running on it.
+    opsteam:
+      endpoint: "otlp.nr-data.net:4317"
+      licenseKey: ""
+      namespaces: []
+
+    # # If you want to send the namespaced telemetry data from the
+    # # cluster to the accounts of the individual dev teams
+    # # comment in below.
+    # # Dev team 1 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam1:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam1
+    # # Dev team 2 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam2:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam2
+
+### DAEMONSET CONFIG ###
+# This configuration is responsible for collecting the logs from the
+# applications running on the cluster.
+daemonset:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.74.0"
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+          - namespaces
+        verbs:
+          - get
+          - watch
+          - list
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # New Relic account configuration
+  newrelic:
+    # OPS team which is responsible for the cluster and common apps
+    # running on it.
+    opsteam:
+      endpoint: "otlp.nr-data.net:4317"
+      licenseKey: ""
+      namespaces: []
+
+    # # If you want to send the namespaced telemetry data from the
+    # # cluster to the accounts of the individual dev teams
+    # # comment in below.
+    # # Dev team 1 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam1:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam1
+    # # Dev team 2 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam2:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam2
+
+### STATEFULSET CONFIG ###
+# This configuration is responsible for scraping the metrics from the
+# various endpoints within the cluster.
+statefulset:
+
+  # Image
+  image:
+    # Repository
+    repository: otel/opentelemetry-collector-contrib
+    # Image pull policy
+    pullPolicy: IfNotPresent
+    # Image tag
+    tag: "0.74.0"
+
+  # Amount of replicas
+  replicas: 2
+
+  # Service account
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+
+  clusterRole:
+    # Annotations to add to the clusterRole
+    # Can be used in combination with presets that create a cluster role.
+    annotations: {}
+    # A set of rules as documented here : https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # Can be used in combination with presets that create a cluster role to add additional rules.
+    rules:
+      - apiGroups:
+        - ""
+        resources:
+          - events
+          - namespaces
+          - namespaces/status
+          - nodes
+          - nodes/spec
+          - nodes/stats
+          - nodes/proxy
+          - nodes/metrics
+          - pods
+          - pods/status
+          - replicationcontrollers
+          - replicationcontrollers/status
+          - resourcequotas
+          - services
+          - endpoints
+          - ingresses
+          - configmaps
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+        - apps
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+          - statefulsets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - extensions
+        resources:
+          - daemonsets
+          - deployments
+          - replicasets
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - batch
+        resources:
+          - jobs
+          - cronjobs
+        verbs:
+          - get
+          - list
+          - watch
+      - apiGroups:
+          - autoscaling
+        resources:
+          - horizontalpodautoscalers
+        verbs:
+          - get
+          - list
+          - watch
+      - nonResourceURLs:
+          - "/metrics"
+          - "/metrics/cadvisor"
+        verbs:
+          - "get"
+
+  clusterRoleBinding:
+    # Annotations to add to the clusterRoleBinding
+    # Can be used in combination with presets that create a cluster role binding.
+    annotations: {}
+
+  # Array of key value pairs defining the ports for the
+  # collector to expose
+  ports:
+    # Prometheus
+    prometheus:
+      name: prometheus
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+
+  # Resource limits & requests. Update according to your own use case as these values might be too low for a typical deployment.
+  resources:
+    requests:
+      cpu: 32m
+      memory: 128Mi
+    limits:
+      cpu: 256m
+      memory: 512Mi
+
+  # New Relic account configuration
+  newrelic:
+    # OPS team which is responsible for the cluster and common apps
+    # running on it.
+    opsteam:
+      endpoint: "otlp.nr-data.net:4317"
+      licenseKey: ""
+      namespaces: []
+
+    # # If you want to send the namespaced telemetry data from the
+    # # cluster to the accounts of the individual dev teams
+    # # comment in below.
+    # # Dev team 1 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam1:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam1
+    # # Dev team 2 which is responsible for its own apps running
+    # # in a specific namespace.
+    # devteam2:
+    #   endpoint: "otlp.nr-data.net:4317"
+    #   licenseKey: ""
+    #   namespaces:
+    #     - devteam2
