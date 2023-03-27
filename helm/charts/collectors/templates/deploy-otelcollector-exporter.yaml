@@ -1,0 +1,104 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.name }}-exporter
+  namespace: {{ .Release.Namespace }}
+spec:
+
+  # Mode
+  mode: "deployment"
+
+  # Service Account
+  serviceAccount: {{ .Values.name }}
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.deployment.ports.prometheus.port }}
+      targetPort: {{ .Values.deployment.ports.prometheus.targetPort }}
+
+  # Image
+  image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+  imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+
+  # Environment variables
+  env:
+  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $.Values.name }}
+          key: {{ $teamName }}
+  {{- end }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+      {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{- range $namespace := $teamInfo.namespaces }}
+            - 'attributes["k8s.namespace.name"] != "{{ $namespace }}"'
+          {{- end }}
+      {{- end }}
+      {{- end }}
+
+    exporters:
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+    {{- end }}
+      logging:
+        verbosity: detailed
+
+    extensions:
+      memory_ballast:
+        size_in_percentage: 20
+
+    service:
+      extensions:
+        - memory_ballast
+      pipelines:
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+        traces/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - batch
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+      {{- end }}
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        metrics:
+          address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}

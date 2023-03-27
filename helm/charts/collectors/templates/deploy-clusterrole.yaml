@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.name }}
+  {{- if .Values.deployment.clusterRole.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.deployment.clusterRole.annotations }}
+    {{- printf "%s: %s" $key (tpl $value $ | quote) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+rules:
+  {{- if .Values.deployment.clusterRole.rules -}}
+  {{ toYaml .Values.deployment.clusterRole.rules | nindent 2 -}}
+  {{- end }}
