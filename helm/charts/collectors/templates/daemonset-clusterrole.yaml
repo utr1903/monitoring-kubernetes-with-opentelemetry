@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.name }}-daemonset
+  name: {{ .Values.name }}-ds
   {{- if .Values.daemonset.clusterRole.annotations }}
   annotations:
     {{- range $key, $value := .Values.daemonset.clusterRole.annotations }}

@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.name }}-daemonset
+  name: {{ .Values.name }}-ds
   {{- if .Values.daemonset.clusterRoleBinding.annotations }}
   annotations:
     {{- range $key, $value := .Values.daemonset.clusterRoleBinding.annotations }}
@@ -11,8 +11,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-ds
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-ds
   namespace: {{ .Release.Namespace }}

@@ -1,7 +1,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-deployment-receiver
+  name: {{ .Values.name }}-dep-rec
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -9,7 +9,7 @@ spec:
   mode: "deployment"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}
+  serviceAccount: {{ .Values.name }}-dep
 
   # Ports to expose per service
   ports:
@@ -21,18 +21,6 @@ spec:
   # Image
   image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
   imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
-
-  # Environment variables
-  env:
-  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
-    - name: {{ $teamName }}-endpoint
-      value: {{ $teamInfo.endpoint }}
-    - name: {{ $teamName }}-licenseKey
-      valueFrom:
-        secretKeyRef:
-          name: {{ $.Values.name }}
-          key: {{ $teamName }}
-  {{- end }}
 
   # Otel configuration
   config: |
@@ -76,7 +64,7 @@ spec:
               insecure: true
         resolver:
           dns:
-            hostname: "{{ .Values.name }}-exporter-collector-headless.{{ .Release.Namespace }}.svc.cluster.local"
+            hostname: "{{ .Values.name }}-dep-exp-collector-headless.{{ .Release.Namespace }}.svc.cluster.local"
       logging:
         verbosity: detailed
 
