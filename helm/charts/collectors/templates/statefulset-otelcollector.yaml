@@ -1,0 +1,160 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.name }}-sts
+  namespace: {{ .Release.Namespace }}
+spec:
+
+  # Mode
+  mode: "statefulset"
+
+  # Number of replicas
+  replicas: 2
+
+  # Service Account
+  serviceAccount: {{ .Values.name }}-sts
+
+  # Target allocator
+  targetAllocator:
+    enabled: true
+    serviceAccount: {{ .Values.name }}-sts
+    prometheusCR:
+      enabled: false
+
+  # Ports to expose per service
+  ports:
+    - name: prometheus
+      protocol: TCP
+      port: {{ .Values.statefulset.ports.prometheus.port }}
+      targetPort: {{ .Values.statefulset.ports.prometheus.targetPort }}
+
+  # Image
+  image: "{{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}"
+  imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
+
+  # Environment variables
+  env:
+  {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $.Values.name }}-sts
+          key: {{ $teamName }}
+  {{- end }}
+
+  # Otel configuration
+  config: |
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otelcollector'
+              scrape_interval: 10s
+              static_configs:
+              - targets:
+                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+
+            - job_name: 'kubernetes-nodes-cadvisor'
+
+              scheme: https
+              tls_config:
+                ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecure_skip_verify: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+              kubernetes_sd_configs:
+                - role: node
+
+              relabel_configs:
+                # - action: labelmap
+                #   regex: __meta_kubernetes_node_label_(.+)
+                #   # replacement: $$1
+                #   # separator: ;
+                - target_label: __address__
+                  replacement: kubernetes.default.svc:443
+                - source_labels: [__meta_kubernetes_node_name]
+                  regex: (.+)
+                  target_label: __metrics_path__
+                  replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
+
+    processors:
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      cumulativetodelta:
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
+      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
+      {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        metrics:
+          datapoint:
+          {{- range $namespace := $teamInfo.namespaces }}
+            - 'attributes["namespace"] != "{{ $namespace }}"'
+          {{- end }}
+      {{- end }}
+      {{- end }}
+
+    exporters:
+    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+    {{- end }}
+      logging:
+        # verbosity: detailed
+
+    extensions:
+      memory_ballast:
+        size_in_percentage: 20
+
+    service:
+      extensions:
+        - memory_ballast
+      pipelines:
+      {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - prometheus
+          processors:
+            - k8sattributes
+            - batch
+            - memory_limiter
+            - cumulativetodelta
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+      {{- end }}
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        metrics:
+          address: 0.0.0.0:{{ .Values.statefulset.ports.prometheus.targetPort }}
