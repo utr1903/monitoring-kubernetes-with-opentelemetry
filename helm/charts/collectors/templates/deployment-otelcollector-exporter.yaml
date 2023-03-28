@@ -37,6 +37,14 @@ spec:
   # Otel configuration
   config: |
     receivers:
+      prometheus/self:
+        config:
+          scrape_configs:
+            - job_name: 'otelcollector'
+              scrape_interval: 10s
+              static_configs:
+              - targets:
+                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
       otlp:
         protocols:
           grpc:
@@ -51,6 +59,23 @@ spec:
          check_interval: 1s
          limit_percentage: 80
          spike_limit_percentage: 25
+      cumulativetodelta:
+      k8sattributes:
+        extract:
+          metadata:
+          - k8s.node.name
+          - k8s.namespace.name
+          - k8s.pod.name
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: connection
       {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
@@ -83,6 +108,17 @@ spec:
       extensions:
         - memory_ballast
       pipelines:
+        metrics/self:
+          receivers:
+            - prometheus/self
+          processors:
+            - k8sattributes
+            - batch
+            - memory_limiter
+            - cumulativetodelta
+          exporters:
+            - otlp/opsteam
+            # - logging
       {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
         traces/{{ $teamName }}:
           receivers:

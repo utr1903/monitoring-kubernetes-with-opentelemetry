@@ -47,7 +47,7 @@ spec:
   # Otel configuration
   config: |
     receivers:
-      prometheus:
+      prometheus/self:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
@@ -55,9 +55,11 @@ spec:
               static_configs:
               - targets:
                 - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
-
+      prometheus:
+        config:
+          scrape_configs:
             - job_name: 'kubernetes-nodes-cadvisor'
-
+              scrape_interval: 30s
               scheme: https
               tls_config:
                 ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -137,6 +139,17 @@ spec:
       extensions:
         - memory_ballast
       pipelines:
+        metrics/self:
+          receivers:
+            - prometheus/self
+          processors:
+            - k8sattributes
+            - batch
+            - memory_limiter
+            - cumulativetodelta
+          exporters:
+            - otlp/opsteam
+            # - logging
       {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
         metrics/{{ $teamName }}:
           receivers:
