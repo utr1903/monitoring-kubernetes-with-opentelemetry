@@ -25,12 +25,15 @@ helm upgrade ${otelcollectors[name]} \
   --create-namespace \
   --namespace ${otelcollectors[namespace]} \
   --set name=${otelcollectors[name]} \
+  --set traces.enabled=true \
   --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
   --set deployment.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set deployment.newrelic.opsteam.licenseKey=$NEWRELIC_LICENSE_KEY \
+  --set logs.enabled=true \
   --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
   --set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set daemonset.newrelic.opsteam.licenseKey=$NEWRELIC_LICENSE_KEY \
+  --set metrics.enabled=true \
   --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
   --set statefulset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set statefulset.newrelic.opsteam.licenseKey=$NEWRELIC_LICENSE_KEY \

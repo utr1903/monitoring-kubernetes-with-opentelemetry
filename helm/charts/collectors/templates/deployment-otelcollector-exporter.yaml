@@ -1,3 +1,4 @@
+{{- if eq .Values.traces.enabled true -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -138,3 +139,4 @@ spec:
         #   level: DEBUG
         metrics:
           address: 0.0.0.0:{{ .Values.deployment.ports.prometheus.targetPort }}
+{{- end -}}
