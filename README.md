@@ -16,11 +16,11 @@ The Helm chart uses Open Telemetry collector Custom Resource Definition (CRD) wh
 
 ### Daemonset
 
-The daemonset is primarily used to gather the logs of the applications. It uses the `filelogreceiver` to _tail_ the logs from the nodes (`var/log/pods/...`). Each collector instance is responsible for the collection and forwarding of the logs on its own node where it's running to corresponding New Relic accounts. [`Daemonset collector config`](./helm/charts/collectors/templates/daemonset-otelcollector.yaml) can be adapted in order to filter or enrich the logs.
+The daemonset is primarily used to gather the logs of the applications. It uses the `filelogreceiver` to _tail_ the logs from the nodes (`var/log/pods/...`). Each collector instance is responsible for the collection and forwarding of the logs to corresponding New Relic accounts on its own node where they are running. [`Daemonset collector config`](./helm/charts/collectors/templates/daemonset-otelcollector.yaml) can be adapted in order to filter or enrich the logs.
 
 ### Deployment
 
-The deployment is primarily used to gather the traces and therefore consists of 2 separate deployments as `recevier` and `exporter`. The reason for this is that the traces are mostly to be sampled and sampling works properly only when all the spans of a trace are processed by one collector instance.
+The deployment is primarily used to gather the traces per the `otlprecevier` and therefore consists of 2 separate deployments as `recevier` and `exporter`. The reason for this is that the traces are mostly to be sampled and sampling works properly only when all the spans of a trace are processed by one collector instance.
 
 The `receiver` collector is responsible for gathering all of the spans from different applications. It will forward these spans per the `loadbalancingexporter` to the `exporter` collector where they will be sampled according to their trace IDs. The `exporter` collector will then flush the sampled spans to necessary New Relic accounts. Please see official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-stateful-collectors) for more!
 
@@ -28,7 +28,7 @@ The `receiver` collector is responsible for gathering all of the spans from diff
 
 The statefulset is primarily used to scrape the metrics throughout the cluster. It uses the `prometheusreceiver` to fetch metrics per various Kubernetes service discovery possibilities (`services`, `nodes`, `cadvisor`...).
 
-In order to be able able to scale it out, the [Target Allocator](https://github.com/open-telemetry/opentelemetry-operator#target-allocator) is used which distributes the to be scraped endpoints which are discovered by the Kubernetes service discovary as evenly as possible across the instances of the statefulsets so that each endpoint is scraped only once by one collector instance at a time. Thereby, the requirement to maintain a central Prometheus server with huge memory needs can be replaced by multiple smaller instances of collector scrapers. Please refer to the official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-the-scrapers) for more!
+In order to be able able to scale it out, the [Target Allocator](https://github.com/open-telemetry/opentelemetry-operator#target-allocator) is used which distributes the to be scraped endpoints that are discovered by the Kubernetes service discovery as evenly as possible across the instances of the statefulsets so that each endpoint is scraped only once by one collector instance at a time. Thereby, the requirement to maintain a central Prometheus server with huge memory needs can be replaced by multiple smaller instances of collector scrapers. Please refer to the official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-the-scrapers) for more!
 
 ## Multi-account export
 
@@ -49,7 +49,7 @@ Since the monitoring tools are mostly deployed by the ops team, the collected te
 
 ### Solution
 
-Every collector is configured to accept multiple filtering & exporting possibilities see ([`values.yaml`](./helm/charts/collectors/values.yaml)):
+Every collector is configured to accept multiple filtering & exporting possibilities (see [`values.yaml`](./helm/charts/collectors/values.yaml)):
 
 - `1` ops team
 - `x` dev teams
