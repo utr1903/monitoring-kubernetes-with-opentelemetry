@@ -3,6 +3,17 @@
 # Name
 name: "nr-otel"
 
+### Flags ###
+# Logs
+logs:
+  enabled: true
+# Traces
+traces:
+  enabled: true
+# Metrics
+metrics:
+  enabled: true
+
 ### DEPLOYMENT CONFIG ###
 # This configuration creates 2 collectors as Kubernetes deployments:
 # - receiver
