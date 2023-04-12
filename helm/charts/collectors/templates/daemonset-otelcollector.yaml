@@ -55,7 +55,7 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+                - 0.0.0.0:{{ .Values.daemonset.ports.prometheus.port }}
       filelog:
         start_at: end
         include:
@@ -149,11 +149,20 @@ spec:
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        metrics:
-          datapoint:
-          {{- range $namespace := $teamInfo.namespaces }}
-            - 'attributes["k8s.namespace.name"] != "{{ $namespace }}"'
-          {{- end }}
+        logs:
+          log_record:
+          {{ $condition := "IsMatch(attributes[\"k8s.namespace.name\"], " -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $condition = printf "%s\"%s" $condition $namespace -}}
+            {{ else }}
+              {{- $condition = printf "%s|%s" $condition $namespace -}}
+            {{- end -}}
+            {{- if eq $index (sub (len $teamInfo.namespaces) 1) -}}
+              {{- $condition = printf "%s\") == false" $condition -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $condition }}'
       {{- end }}
       {{- end }}
 
