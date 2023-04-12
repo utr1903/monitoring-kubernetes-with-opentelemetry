@@ -45,7 +45,7 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+                - 0.0.0.0:{{ .Values.deployment.ports.prometheus.port }}
       otlp:
         protocols:
           grpc:
