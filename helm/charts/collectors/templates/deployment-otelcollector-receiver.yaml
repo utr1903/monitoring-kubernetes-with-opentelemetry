@@ -25,7 +25,7 @@ spec:
 
   # Environment variables
   env:
-  {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
   {{- if eq $teamName "opsteam" }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
@@ -47,7 +47,7 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets:
-                - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+                - 0.0.0.0:{{ .Values.deployment.ports.prometheus.port }}
       otlp:
         protocols:
           grpc:

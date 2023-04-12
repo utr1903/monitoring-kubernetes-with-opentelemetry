@@ -114,12 +114,20 @@ spec:
         error_mode: ignore
         metrics:
           datapoint:
-          {{- range $namespace := $teamInfo.namespaces }}
-            - 'attributes["namespace"] != "{{ $namespace }}"'
-          {{- end }}
+          {{ $condition := "IsMatch(attributes[\"namespace\"], " -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $condition = printf "%s\"%s" $condition $namespace -}}
+            {{ else }}
+              {{- $condition = printf "%s|%s" $condition $namespace -}}
+            {{- end -}}
+            {{- if eq $index (sub (len $teamInfo.namespaces) 1) -}}
+              {{- $condition = printf "%s\") == false" $condition -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $condition }}'
       {{- end }}
       {{- end }}
-
     exporters:
     {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
       otlp/{{ $teamName }}:
