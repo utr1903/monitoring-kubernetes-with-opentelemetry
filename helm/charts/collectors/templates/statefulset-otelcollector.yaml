@@ -145,9 +145,9 @@ spec:
             - prometheus/self
           processors:
             - k8sattributes
-            - batch
             - memory_limiter
             - cumulativetodelta
+            - batch
           exporters:
             - otlp/opsteam
             # - logging
@@ -157,12 +157,12 @@ spec:
             - prometheus
           processors:
             - k8sattributes
-            - batch
             - memory_limiter
             - cumulativetodelta
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}
+            - batch
           exporters:
             - otlp/{{ $teamName }}
             # - logging

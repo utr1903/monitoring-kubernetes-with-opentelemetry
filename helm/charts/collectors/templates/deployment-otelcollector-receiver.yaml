@@ -111,9 +111,9 @@ spec:
             - prometheus/self
           processors:
             - k8sattributes
-            - batch
             - memory_limiter
             - cumulativetodelta
+            - batch
           exporters:
             - otlp/opsteam
             # - logging
@@ -121,9 +121,9 @@ spec:
           receivers:
             - otlp
           processors:
-            - batch
             - memory_limiter
             - k8sattributes
+            - batch
           exporters:
             - loadbalancing
             # - logging
