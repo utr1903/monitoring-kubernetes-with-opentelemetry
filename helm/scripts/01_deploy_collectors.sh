@@ -5,6 +5,16 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 ### Set variables
 
+# kubestatemetrics
+declare -A kubestatemetrics
+kubestatemetrics["name"]="kubestatemetrics"
+kubestatemetrics["namespace"]="monitoring"
+
+# nodeexporter
+declare -A nodeexporter
+nodeexporter["name"]="nodeexporter"
+nodeexporter["namespace"]="monitoring"
+
 # otelcollectors
 declare -A otelcollectors
 otelcollectors["name"]="nr-otel"
@@ -16,6 +26,36 @@ otelcollectors["statefulsetPrometheusPort"]=8888
 ###################
 ### Deploy Helm ###
 ###################
+
+# Repositories
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm repo update
+
+# nodeexporter
+helm upgrade ${nodeexporter[name]} \
+  --install \
+  --wait \
+  --debug \
+  --create-namespace \
+  --namespace ${nodeexporter[namespace]} \
+  --set tolerations[0].key="node-role.kubernetes.io/master" \
+  --set tolerations[0].operator="Exists" \
+  --set tolerations[0].effect="NoSchedule" \
+  --set tolerations[1].key="node-role.kubernetes.io/control-plane" \
+  --set tolerations[1].operator="Exists" \
+  --set tolerations[1].effect="NoSchedule" \
+  "bitnami/node-exporter"
+
+# kubestatemetrics
+helm upgrade ${kubestatemetrics[name]} \
+  --install \
+  --wait \
+  --debug \
+  --create-namespace \
+  --namespace ${kubestatemetrics[namespace]} \
+  --set autosharding.enabled=true \
+  "prometheus-community/kube-state-metrics"
 
 # otelcollector
 helm upgrade ${otelcollectors[name]} \
