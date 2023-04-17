@@ -3,6 +3,9 @@
 # Name
 name: "nr-otel"
 
+# Cluster name
+clusterName: "my-dope-cluster"
+
 ### Flags ###
 # Logs
 logs:

@@ -5,6 +5,9 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 ### Set variables
 
+# cluster name
+clusterName="my-dope-cluster"
+
 # kubestatemetrics
 declare -A kubestatemetrics
 kubestatemetrics["name"]="kubestatemetrics"
@@ -65,6 +68,7 @@ helm upgrade ${otelcollectors[name]} \
   --create-namespace \
   --namespace ${otelcollectors[namespace]} \
   --set name=${otelcollectors[name]} \
+  --set clusterName=$clusterName \
   --set traces.enabled=true \
   --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
   --set deployment.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
