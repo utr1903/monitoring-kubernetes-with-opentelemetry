@@ -4,6 +4,9 @@
 newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 ### Set variables
+declare -A nodeexporter
+nodeexporter["name"]="nodeexporter"
+nodeexporter["namespace"]="monitoring"
 
 # otelcollectors
 declare -A otelcollectors
@@ -16,6 +19,22 @@ otelcollectors["statefulsetPrometheusPort"]=8888
 ###################
 ### Deploy Helm ###
 ###################
+
+# nodeexporter
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+helm upgrade ${nodeexporter[name]} \
+  --install \
+  --wait \
+  --debug \
+  --create-namespace \
+  --namespace ${nodeexporter[namespace]} \
+  --set tolerations[0].key="node-role.kubernetes.io/master" \
+  --set tolerations[0].operator="Exists" \
+  --set tolerations[0].effect="NoSchedule" \
+  --set tolerations[1].key="node-role.kubernetes.io/control-plane" \
+  --set tolerations[1].operator="Exists" \
+  --set tolerations[1].effect="NoSchedule" \
+  bitnami/node-exporter
 
 # otelcollector
 helm upgrade ${otelcollectors[name]} \
