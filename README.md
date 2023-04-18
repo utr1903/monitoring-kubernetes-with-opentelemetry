@@ -86,3 +86,48 @@ Since all of the telemetry data is centrally collected by 3 variations of collec
 ## Deploy!
 
 Feel free to customize the [Kubernetes manifest files](./helm/charts/collectors/templates/)! You can simply add your OTLP endpoints and license keys according to your New Relic accounts and run the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh).
+
+The script deploys `node-exporter` and `kube-state-metrics` with the OTel collectors which are required for the monitoring (see Monitoring section below).
+
+Moreover, you will need to define a cluster name:
+
+```shell
+# cluster name
+clusterName="my-dope-cluster"
+
+...
+
+# otelcollector
+helm upgrade ${otelcollectors[name]} \
+  ...
+  --set clusterName=$clusterName \
+  ...
+  "../charts/collectors"
+```
+
+The cluster name that you define will be added as an additional attribute `k8s.cluster.name` to all of telemetry data which are collected by the collectors so that later, you can filter them out according to your various clusters.
+
+## Monitoring
+
+An example [monitoring](/monitoring/terraform/) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script.
+
+Don't forget to define the name of the cluster that you would like to monitor:
+
+```shell
+clusterName="my-dope-cluster"
+```
+
+**Remark:** Keep in mind that this cluster name should match the one which you have run the `helm charts` with!
+
+Moreover, you will need to define the following variables within the `terraform` commands
+
+```shell
+terraform -chdir=../terraform plan \
+  -var NEW_RELIC_ACCOUNT_ID=$NEWRELIC_ACCOUNT_ID \
+  -var NEW_RELIC_API_KEY=$NEWRELIC_API_KEY \
+  -var NEW_RELIC_REGION=$NEWRELIC_REGION \
+  -var cluster_name=$clusterName \
+  -out "./tfplan"
+```
+
+where `NEW_RELIC_ACCOUNT_ID` corresponds to your New Relic account ID, `NEW_RELIC_API_KEY` to your [User API Key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key) and `NEWRELIC_REGION` to the data center region of your New Relic account (`us` or `eu`).
