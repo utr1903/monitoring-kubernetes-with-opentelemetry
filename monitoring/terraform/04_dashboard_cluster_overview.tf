@@ -4,7 +4,7 @@
 
 # Infrastructure
 resource "newrelic_one_dashboard" "infra" {
-  name = "K8s | ${var.cluster_name}"
+  name = "K8s | ${var.cluster_name} | Cluster Overview"
 
   #####################
   ### NODE OVERVIEW ###
