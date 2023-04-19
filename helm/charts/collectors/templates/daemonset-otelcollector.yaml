@@ -128,14 +128,7 @@ spec:
           type: move
 
     processors:
-      batch:
-        send_batch_max_size: 1000
-        timeout: 30s
-        send_batch_size : 800
-      memory_limiter:
-         check_interval: 1s
-         limit_percentage: 80
-         spike_limit_percentage: 25
+      cumulativetodelta:
       k8sattributes:
         extract:
           metadata:
@@ -152,7 +145,11 @@ spec:
             name: k8s.pod.uid
         - sources:
           - from: connection
-      cumulativetodelta:
+      attributes:
+        actions:
+          - key: k8s.cluster.name
+            value: {{ .Values.clusterName }}
+            action: upsert
       {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
@@ -173,6 +170,14 @@ spec:
             - '{{ $condition }}'
       {{- end }}
       {{- end }}
+      memory_limiter:
+         check_interval: 1s
+         limit_percentage: 80
+         spike_limit_percentage: 25
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
 
     exporters:
     {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
@@ -198,9 +203,10 @@ spec:
           receivers:
             - prometheus/self
           processors:
-            - k8sattributes
-            - memory_limiter
             - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
             - batch
           exporters:
             - otlp/opsteam
@@ -211,6 +217,8 @@ spec:
             - filelog
           processors:
             - k8sattributes
+            - attributes
+            - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
             - filter/{{ $teamName }}
           {{- end }}

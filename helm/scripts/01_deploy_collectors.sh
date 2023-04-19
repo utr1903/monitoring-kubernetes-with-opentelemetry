@@ -5,6 +5,9 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 ### Set variables
 
+# cluster name
+clusterName="my-dope-cluster"
+
 # kubestatemetrics
 declare -A kubestatemetrics
 kubestatemetrics["name"]="kubestatemetrics"
@@ -28,9 +31,9 @@ otelcollectors["statefulsetPrometheusPort"]=8888
 ###################
 
 # Repositories
-# helm repo add bitnami https://charts.bitnami.com/bitnami
-# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-# helm repo update
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
 
 # nodeexporter
 helm upgrade ${nodeexporter[name]} \
@@ -65,6 +68,7 @@ helm upgrade ${otelcollectors[name]} \
   --create-namespace \
   --namespace ${otelcollectors[namespace]} \
   --set name=${otelcollectors[name]} \
+  --set clusterName=$clusterName \
   --set traces.enabled=true \
   --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
   --set deployment.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
