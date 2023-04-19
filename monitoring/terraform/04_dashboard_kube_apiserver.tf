@@ -216,9 +216,9 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
       }
     }
 
-    # Rate of requests being processed currently (rpm)
+    # Rate of requests being processed by request kind (rpm)
     widget_line {
-      title  = "Rate of requests being processed currently (rpm)"
+      title  = "Rate of requests being processed by request kind (rpm)"
       row    = 19
       column = 1
       height = 3
@@ -226,7 +226,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(apiserver_current_inflight_requests), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(apiserver_current_inflight_requests), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-apiservers' FACET request_kind TIMESERIES AUTO"
       }
     }
 
