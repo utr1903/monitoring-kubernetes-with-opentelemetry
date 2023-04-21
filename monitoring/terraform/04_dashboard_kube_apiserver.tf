@@ -34,9 +34,9 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
       }
     }
 
-    # Pod statuses per nodes
+    # Node up statuses
     widget_line {
-      title  = "Pod statuses per nodes"
+      title  = "Node up statuses"
       row    = 1
       column = 9
       height = 3
