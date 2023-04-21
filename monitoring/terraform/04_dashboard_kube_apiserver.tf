@@ -34,9 +34,9 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
       }
     }
 
-    # Node Capacities
+    # Pod statuses per nodes
     widget_line {
-      title  = "Node Capacities"
+      title  = "Pod statuses per nodes"
       row    = 1
       column = 9
       height = 3
