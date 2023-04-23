@@ -17,7 +17,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
       height = 3
       width  = 4
 
-      text = "## OTel Collectors\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Nodes Endpoints\n- Node Exporter\n- Kube State Metrics\n- OTel Collector"
+      text = "## OTel Collectors\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Nodes Endpoints\n- Node Exporter\n- cAdvisor\n- Kube State Metrics\n- OTel Collectors"
     }
 
     # Node Capacities

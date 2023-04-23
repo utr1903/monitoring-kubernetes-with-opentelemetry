@@ -17,7 +17,7 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
       height = 3
       width  = 4
 
-      text = "## Kube API Server\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Nodes Endpoints\n- Node Exporter\n- Kube State Metrics\n- Kube API Server"
+      text = "## Kube API Server\nTo be able to visualize every widget properly, Prometheus should be able to scrape the following resources:\n- Nodes Endpoints\n- Node Exporter\n- cAdvisor\n- Kube State Metrics\n- Kube API Server"
     }
 
     # Node Capacities
