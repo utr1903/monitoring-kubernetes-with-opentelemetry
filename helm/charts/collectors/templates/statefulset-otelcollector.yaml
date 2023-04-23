@@ -35,6 +35,18 @@ spec:
 
   # Environment variables
   env:
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
   {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
@@ -231,6 +243,20 @@ spec:
           - key: k8s.cluster.name
             value: {{ .Values.clusterName }}
             action: upsert
+      attributes/self:
+        actions:
+          - key: otelcollector.type
+            value: statefulset
+            action: upsert
+          - key: k8s.node.name
+            value: $MY_NODE_NAME
+            action: upsert
+          - key: k8s.namespace.name
+            value: $MY_NAMESPACE_NAME
+            action: upsert
+          - key: k8s.pod.name
+            value: $MY_POD_NAME
+            action: upsert
       {{- range $teamName, $teamInfo := .Values.statefulset.newrelic }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
@@ -287,6 +313,7 @@ spec:
             - cumulativetodelta
             - k8sattributes
             - attributes
+            - attributes/self
             - memory_limiter
             - batch
           exporters:
