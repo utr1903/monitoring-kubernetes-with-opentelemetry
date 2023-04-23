@@ -34,9 +34,9 @@ resource "newrelic_one_dashboard" "kube_apiserver" {
       }
     }
 
-    # Node Capacities
+    # Node up statuses
     widget_line {
-      title  = "Node Capacities"
+      title  = "Node up statuses"
       row    = 1
       column = 9
       height = 3
