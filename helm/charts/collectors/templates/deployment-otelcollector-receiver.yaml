@@ -23,6 +23,15 @@ spec:
   image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
   imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
 
+  # Resources
+  resources:
+    requests:
+      cpu: {{ .Values.deployment.resources.requests.cpu }}
+      memory: {{ .Values.deployment.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.deployment.resources.limits.cpu }}
+      memory: {{ .Values.deployment.resources.limits.memory }}
+
   # Environment variables
   env:
     - name: MY_NODE_NAME
