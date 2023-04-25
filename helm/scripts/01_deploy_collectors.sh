@@ -76,7 +76,7 @@ helm upgrade ${otelcollectors[name]} \
   --set logs.enabled=true \
   --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
   --set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-  --set deployment.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+  --set daemonset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
   --set metrics.enabled=true \
   --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
   --set statefulset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
