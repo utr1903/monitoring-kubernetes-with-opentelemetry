@@ -118,11 +118,25 @@ resource "newrelic_one_dashboard" "otel_collector" {
       }
     }
 
+    # Container CPU Utilization per Pod (%)
+    widget_line {
+      title  = "Container CPU Utilization per Pod (%)"
+      row    = 7
+      column = 7
+      height = 3
+      width  = 6
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = "FROM (FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}))), 1 second) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
+      }
+    }
+
     # Container MEM Usage per Pod (bytes)
     widget_area {
       title  = "Container MEM Usage per Pod (bytes)"
-      row    = 7
-      column = 7
+      row    = 10
+      column = 1
       height = 3
       width  = 6
 
@@ -132,15 +146,27 @@ resource "newrelic_one_dashboard" "otel_collector" {
       }
     }
 
-    # Latest queue size/capacity (%)
-    widget_bullet {
-      title  = "Latest queue size/capacity (%)"
+    # Container MEM Utilization per Pod (%)
+    widget_line {
+      title  = "Container MEM Utilization per Pod (%)"
       row    = 10
+      column = 7
+      height = 3
+      width  = 6
+
+      nrql_query {
+        account_id = var.NEW_RELIC_ACCOUNT_ID
+        query      = "FROM (FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}))) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
+      }
+    }
+
+    # Latest queue size/capacity (%)
+    widget_bar {
+      title  = "Latest queue size/capacity (%)"
+      row    = 13
       column = 1
       height = 3
       width  = 4
-
-      limit = 100
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
@@ -151,7 +177,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Max queue size/capacity (%)
     widget_line {
       title  = "Max queue size/capacity (%)"
-      row    = 10
+      row    = 13
       column = 7
       height = 3
       width  = 8
@@ -165,7 +191,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Dropped metric points
     widget_line {
       title  = "Dropped metric points"
-      row    = 13
+      row    = 16
       column = 1
       height = 3
       width  = 4
@@ -179,7 +205,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Dropped spans
     widget_line {
       title  = "Dropped spans"
-      row    = 13
+      row    = 16
       column = 5
       height = 3
       width  = 4
@@ -193,7 +219,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Dropped log records
     widget_line {
       title  = "Dropped log records"
-      row    = 13
+      row    = 16
       column = 9
       height = 3
       width  = 4
@@ -207,7 +233,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Enqueue failed metric points
     widget_line {
       title  = "Enqueue failed metric points"
-      row    = 16
+      row    = 19
       column = 1
       height = 3
       width  = 4
@@ -221,7 +247,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Enqueue failed spans
     widget_line {
       title  = "Enqueue failed spans"
-      row    = 16
+      row    = 19
       column = 5
       height = 3
       width  = 4
@@ -235,7 +261,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Enqueue failed log records
     widget_line {
       title  = "Enqueue failed log records"
-      row    = 16
+      row    = 19
       column = 9
       height = 3
       width  = 4
@@ -249,7 +275,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Receive failed metric points
     widget_line {
       title  = "Receive failed metric points"
-      row    = 19
+      row    = 22
       column = 1
       height = 3
       width  = 4
@@ -263,7 +289,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Receive failed spans
     widget_line {
       title  = "Receive failed spans"
-      row    = 19
+      row    = 22
       column = 5
       height = 3
       width  = 4
@@ -277,7 +303,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Receive failed log records
     widget_line {
       title  = "Receive failed log records"
-      row    = 19
+      row    = 22
       column = 9
       height = 3
       width  = 4
@@ -291,7 +317,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Export failed metric points
     widget_line {
       title  = "Export failed metric points"
-      row    = 22
+      row    = 25
       column = 1
       height = 3
       width  = 4
@@ -305,7 +331,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Export failed spans
     widget_line {
       title  = "Export failed spans"
-      row    = 22
+      row    = 25
       column = 5
       height = 3
       width  = 4
@@ -319,7 +345,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
     # Export failed log records
     widget_line {
       title  = "Export failed log records"
-      row    = 22
+      row    = 25
       column = 9
       height = 3
       width  = 4
