@@ -107,6 +107,61 @@ helm upgrade ${otelcollectors[name]} \
 
 The cluster name that you define will be added as an additional attribute `k8s.cluster.name` to all of telemetry data which are collected by the collectors so that later, you can filter them out according to your various clusters.
 
+### Setting up license keys
+
+There are 2 ways to set your New Relic license keys:
+
+**Reference an existing secret**
+
+If you already have put your secrets into a Kubernetes secret within the same namespace as this Helm deployment's, you can reference that as follows:
+
+1. Define in `values.yaml`
+
+```yaml
+newrelic:
+  opsteam:
+    endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
+    licenseKey:
+      secretRef:
+        name: "<YOUR_EXISTING_SECRET>"
+        key: "<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>"
+```
+
+2. Set per `helm --set`
+
+```shell
+helm upgrade ... \
+...
+--set statefulset.newrelic.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
+--set statefulset.newrelic.opsteam.licenseKey.secretRef.name="<YOUR_EXISTING_SECRET>" \
+--set statefulset.newrelic.opsteam.licenseKey.secretRef.key="<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>" \
+...
+```
+
+**Create a new secret**
+
+If you haven't defined any secret for your license key and want to create it from scratch, you can
+
+1. Define in `values.yaml`
+
+```yaml
+newrelic:
+  opsteam:
+    endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
+    licenseKey:
+      value: "<YOUR_EXISTING_SECRET>"
+```
+
+2. Set per `helm --set`
+
+```shell
+helm upgrade ... \
+...
+--set statefulset.newrelic.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
+--set statefulset.newrelic.opsteam.licenseKey.value="<NEW_RELIC_LICENSE_KEY>" \
+...
+```
+
 ## Monitoring
 
 An example [monitoring](/monitoring/terraform/) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script.

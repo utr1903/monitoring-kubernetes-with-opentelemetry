@@ -41,11 +41,19 @@ spec:
   {{- if eq $teamName "opsteam" }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
+    {{- if $teamInfo.licenseKey.secretRef }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}-sts
-          key: {{ $teamName }}
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+    {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $.Values.name }}-dep-{{ $teamName }}
+          key: licenseKey
+    {{- end }}
   {{- end }}
   {{- end }}
 
