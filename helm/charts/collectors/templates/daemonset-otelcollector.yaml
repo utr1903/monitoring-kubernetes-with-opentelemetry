@@ -23,6 +23,15 @@ spec:
   image: "{{ .Values.daemonset.image.repository }}:{{ .Values.daemonset.image.tag }}"
   imagePullPolicy: {{ .Values.daemonset.image.pullPolicy }}
 
+  # Resources
+  resources:
+    requests:
+      cpu: {{ .Values.daemonset.resources.requests.cpu }}
+      memory: {{ .Values.daemonset.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.daemonset.resources.limits.cpu }}
+      memory: {{ .Values.daemonset.resources.limits.memory }}
+
   # Volumes and volume mounts
   volumeMounts:
     - name: varlogpods

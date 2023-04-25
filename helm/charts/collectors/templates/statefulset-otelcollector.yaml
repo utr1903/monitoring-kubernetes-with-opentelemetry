@@ -33,6 +33,15 @@ spec:
   image: "{{ .Values.statefulset.image.repository }}:{{ .Values.statefulset.image.tag }}"
   imagePullPolicy: {{ .Values.statefulset.image.pullPolicy }}
 
+  # Resources
+  resources:
+    requests:
+      cpu: {{ .Values.statefulset.resources.requests.cpu }}
+      memory: {{ .Values.statefulset.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.statefulset.resources.limits.cpu }}
+      memory: {{ .Values.statefulset.resources.limits.memory }}
+
   # Environment variables
   env:
     - name: MY_NODE_NAME
