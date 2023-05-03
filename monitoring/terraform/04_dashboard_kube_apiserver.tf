@@ -2,7 +2,7 @@
 ### Dashboards ###
 ##################
 
-# Infrastructure
+# Dashboard - Kube API Server
 resource "newrelic_one_dashboard" "kube_apiserver" {
   name = "K8s | ${var.cluster_name} | Kube API Server"
 
