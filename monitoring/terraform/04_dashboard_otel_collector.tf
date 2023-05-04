@@ -324,7 +324,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
+        query      = "FROM Metric SELECT average(otelcol_exporter_refused_metric_points) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
       }
     }
 
@@ -338,7 +338,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
+        query      = "FROM Metric SELECT average(otelcol_exporter_refused_spans) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
       }
     }
 
@@ -352,7 +352,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(otelcol_receiver_refused_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
+        query      = "FROM Metric SELECT average(otelcol_exporter_refused_log_records) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'otelcollector' FACET k8s.pod.name TIMESERIES"
       }
     }
   }
