@@ -92,6 +92,11 @@ deployment:
       cpu: 256m
       memory: 512Mi
 
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
+
   # New Relic account configuration
   newrelic:
     # OPS team which is responsible for the cluster and common apps
@@ -195,6 +200,11 @@ daemonset:
     limits:
       cpu: 256m
       memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
 
   # New Relic account configuration
   newrelic:
@@ -360,6 +370,11 @@ statefulset:
     limits:
       cpu: 256m
       memory: 512Mi
+
+  # Specific Prometheus configuration
+  prometheus:
+    # Low data mode decreases the scrape frequency of the endpoints
+    lowDataMode: false
 
   # New Relic account configuration
   newrelic:

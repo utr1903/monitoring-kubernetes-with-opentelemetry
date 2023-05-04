@@ -71,7 +71,11 @@ spec:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
+            {{- if .Values.deployment.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
               scrape_interval: 10s
+            {{- end }}
               static_configs:
               - targets:
                 - 0.0.0.0:{{ .Values.deployment.ports.prometheus.port }}
