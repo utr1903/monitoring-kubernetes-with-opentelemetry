@@ -58,7 +58,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `running` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) AND phase = 'Running' FACET pod LIMIT MAX) SELECT sum(`running`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `running` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Running' FACET pod LIMIT MAX) SELECT sum(`running`)"
       }
     }
 
@@ -72,7 +72,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `pending` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) AND phase = 'Pending' FACET pod LIMIT MAX) SELECT sum(`pending`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `pending` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Pending' FACET pod LIMIT MAX) SELECT sum(`pending`)"
       }
     }
 
@@ -86,7 +86,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `failed` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) AND phase = 'Failed' FACET pod LIMIT MAX) SELECT sum(`failed`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `failed` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Failed' FACET pod LIMIT MAX) SELECT sum(`failed`)"
       }
     }
 
@@ -100,7 +100,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `unknown` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) AND phase = 'Unknown' FACET pod LIMIT MAX) SELECT sum(`unknown`)"
+        query      = "FROM (FROM Metric SELECT latest(kube_pod_status_phase) AS `unknown` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) AND phase = 'Unknown' FACET pod LIMIT MAX) SELECT sum(`unknown`)"
       }
     }
 
@@ -114,7 +114,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES LIMIT MAX) SELECT average(`usage`) FACET pod, container TIMESERIES AUTO"
+        query      = "FROM (FROM Metric SELECT rate(sum(container_cpu_usage_seconds_total), 1 second)*1000 AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES LIMIT MAX) SELECT average(`usage`) FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -128,7 +128,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}))), 1 second) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
+        query      = "FROM (FROM Metric SELECT rate(filter(sum(container_cpu_usage_seconds_total), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX)), 1 second) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'cpu') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -142,7 +142,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT average(container_memory_usage_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES AUTO LIMIT MAX) SELECT average(`usage`) FACET pod, container TIMESERIES AUTO"
+        query      = "FROM (FROM Metric SELECT average(container_memory_usage_bytes) AS `usage` WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES AUTO LIMIT MAX) SELECT average(`usage`) FACET pod, container TIMESERIES AUTO"
       }
     }
 
@@ -156,7 +156,7 @@ resource "newrelic_one_dashboard" "otel_collector" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM (FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}))) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}})) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
+        query      = "FROM (FROM Metric SELECT filter(average(container_memory_usage_bytes), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-nodes-cadvisor' AND container IN (FROM Metric SELECT uniques(container) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND kube_pod_container_resource_limits IS NOT NULL AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX)) AS `usage`, filter(max(kube_pod_container_resource_limits), WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND k8s.container.name = 'kube-state-metrics' AND resource = 'memory') AS `limit` WHERE container IS NOT NULL AND pod IN (FROM Metric SELECT uniques(k8s.pod.name) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND otelcollector.type IN ({{collectortypes}}) LIMIT MAX) FACET pod, container TIMESERIES LIMIT MAX) SELECT sum(`usage`)/sum(`limit`)*100 FACET pod, container TIMESERIES AUTO"
       }
     }
 
