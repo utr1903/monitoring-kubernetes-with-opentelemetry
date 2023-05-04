@@ -96,6 +96,8 @@ deployment:
   prometheus:
     # Low data mode decreases the scrape frequency of the endpoints
     lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
 
   # New Relic account configuration
   newrelic:
@@ -205,6 +207,8 @@ daemonset:
   prometheus:
     # Low data mode decreases the scrape frequency of the endpoints
     lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
 
   # New Relic account configuration
   newrelic:
@@ -375,6 +379,8 @@ statefulset:
   prometheus:
     # Low data mode decreases the scrape frequency of the endpoints
     lowDataMode: false
+    # Keeps only the most important metrics and drops the rest of the scraped metrics
+    importantMetricsOnly: false
 
   # New Relic account configuration
   newrelic:
