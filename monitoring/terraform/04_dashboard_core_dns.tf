@@ -2,7 +2,7 @@
 ### Dashboards ###
 ##################
 
-# Infrastructure
+# Dashboard - Core DNS
 resource "newrelic_one_dashboard" "core_dns" {
   name = "K8s | ${var.cluster_name} | Core DNS"
 

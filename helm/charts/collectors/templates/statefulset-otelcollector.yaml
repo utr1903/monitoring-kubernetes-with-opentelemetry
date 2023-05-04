@@ -81,15 +81,31 @@ spec:
         config:
           scrape_configs:
             - job_name: 'otelcollector'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
               scrape_interval: 10s
+            {{- end }}
               static_configs:
               - targets:
                 - 0.0.0.0:{{ .Values.statefulset.ports.prometheus.port }}
+            {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: otelcol_exporter_queue_size|otelcol_exporter_queue_capacity|otelcol_processor_dropped_metric_points|otelcol_processor_dropped_spans|otelcol_processor_dropped_log_records|otelcol_exporter_enqueue_failed_metric_points|otelcol_exporter_enqueue_failed_spans|otelcol_exporter_enqueue_failed_log_records|otelcol_receiver_refused_metric_points|otelcol_receiver_refused_spans|otelcol_receiver_refused_log_records|otelcol_exporter_refused_metric_points|otelcol_exporter_refused_spans|otelcol_exporter_refused_log_records
+                  replacement: $1
+                  action: keep
+            {{- end }}
       prometheus:
         config:
           scrape_configs:
             - job_name: 'kubernetes-apiservers'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 90s
+            {{- else }}
               scrape_interval: 30s
+            {{- end }}
 
               kubernetes_sd_configs:
                 - role: endpoints
@@ -103,9 +119,22 @@ spec:
                 - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
                   action: keep
                   regex: default;kubernetes;https
+              
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: apiserver_request_duration_seconds|apiserver_request_total|workqueue_adds_total|workqueue_depth|apiserver_current_inflight_requests|apiserver_dropped_requests_total
+                  replacement: $1
+                  action: keep
+              {{- end }}
 
             - job_name: 'kubernetes-nodes'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 90s
+            {{- else }}
               scrape_interval: 30s
+            {{- end }}
               scheme: https
               tls_config:
                 ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -126,7 +155,11 @@ spec:
                   replacement: /api/v1/nodes/$$1/proxy/metrics
 
             - job_name: 'kubernetes-nodes-cadvisor'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
               scrape_interval: 30s
+            {{- end }}
               scheme: https
               tls_config:
                 ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -148,8 +181,21 @@ spec:
                   target_label: __metrics_path__
                   replacement: /api/v1/nodes/$$1/proxy/metrics/cadvisor
 
+              {{- if .Values.statefulset.prometheus.importantMetricsOnly }}
+              metric_relabel_configs:
+                - source_labels: [__name__]
+                  separator: ;
+                  regex: container_cpu_usage_seconds_total|container_memory_usage_bytes|container_fs_reads_total|container_fs_writes_total|container_network_receive_bytes_total|container_network_transmit_bytes_total
+                  replacement: $1
+                  action: keep
+              {{- end }}
+
             - job_name: 'kubernetes-service-endpoints'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 60s
+            {{- else }}
               scrape_interval: 30s
+            {{- end }}
               honor_labels: true
 
               kubernetes_sd_configs:
@@ -191,7 +237,11 @@ spec:
                   target_label: node
 
             - job_name: 'kubernetes-pods'
+            {{- if .Values.statefulset.prometheus.lowDataMode }}
+              scrape_interval: 90s
+            {{- else }}
               scrape_interval: 30s
+            {{- end }}
               honor_labels: true
 
               kubernetes_sd_configs:
