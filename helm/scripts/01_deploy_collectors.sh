@@ -79,6 +79,8 @@ helm upgrade ${otelcollectors[name]} \
   --set daemonset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
   --set metrics.enabled=true \
   --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
+  --set statefulset.prometheus.nodeExporterServiceName="${nodeexporter[name]}-node-exporter" \
+  --set statefulset.prometheus.kubeStateMetricsServiceName="${kubestatemetrics[name]}-kube-state-metrics" \
   --set statefulset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
   --set statefulset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
   "../charts/collectors"

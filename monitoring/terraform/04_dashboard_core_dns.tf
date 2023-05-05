@@ -30,7 +30,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'node-exporter' AND k8s.node.name IN (FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND pod LIKE 'coredns-%') FACET k8s.node.name"
+        query      = "FROM Metric SELECT uniqueCount(cpu) AS 'CPU (cores)', max(node_memory_MemTotal_bytes)/1000/1000/1000 AS 'MEM (GB)' WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN (FROM Metric SELECT uniques(node) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND pod LIKE 'coredns-%') FACET k8s.node.name"
       }
     }
 
@@ -142,7 +142,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT histogram(coredns_dns_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns'"
+        query      = "FROM Metric SELECT histogram(coredns_dns_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns'"
       }
     }
 
@@ -156,7 +156,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT average(coredns_dns_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns' FACET k8s.pod.name TIMESERIES AUTO"
+        query      = "FROM Metric SELECT average(coredns_dns_request_duration_seconds) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET k8s.pod.name TIMESERIES AUTO"
       }
     }
 
@@ -170,7 +170,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(coredns_dns_requests_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns' FACET type TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(coredns_dns_requests_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET type TIMESERIES AUTO"
       }
     }
 
@@ -184,7 +184,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(coredns_dns_responses_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns' FACET rcode TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(coredns_dns_responses_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET rcode TIMESERIES AUTO"
       }
     }
 
@@ -198,7 +198,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(coredns_panics_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns' FACET k8s.pod.name TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(coredns_panics_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET k8s.pod.name TIMESERIES AUTO"
       }
     }
 
@@ -212,7 +212,7 @@ resource "newrelic_one_dashboard" "core_dns" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT rate(sum(coredns_cache_hits_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-service-endpoints' AND k8s.container.name = 'coredns' FACET type TIMESERIES AUTO"
+        query      = "FROM Metric SELECT rate(sum(coredns_cache_hits_total), 1 minute) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-coredns' FACET type TIMESERIES AUTO"
       }
     }
   }
