@@ -381,6 +381,10 @@ statefulset:
     lowDataMode: false
     # Keeps only the most important metrics and drops the rest of the scraped metrics
     importantMetricsOnly: false
+    # Node exporter service name
+    nodeExporterServiceName: nodeexporter-node-exporter
+    # Kube state metrics service name
+    kubeStateMetricsServiceName: kubestatemetrics-kube-state-metrics
 
   # New Relic account configuration
   newrelic:
