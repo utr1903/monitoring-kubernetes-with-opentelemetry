@@ -76,7 +76,7 @@ resource "newrelic_one_dashboard" "data_ingest" {
       height = 3
       width  = 2
 
-      text = "## Prometheus scraping\nThe data ingest caused by Prometheus scraping as a whole:\n\n- otelcollector\n- kubernetes-service-endpoints\n- kubernetes-nodes-cadvisor\n- kubernetes-apiservers\n- kubernetes-nodes\n- kubernetes-pods"
+      text = "## Prometheus scraping\nThe data ingest caused by Prometheus scraping as a whole:\n\n- otelcollector\n- kubernetes-nodes\n- kubernetes-nodes-cadvisor\n- kubernetes-apiservers\n- kubernetes-coredns\n- kubernetes-node-exporter\n- kubernetes-kube-state-metrics\n- kubernetes-service-endpoints"
     }
 
     # Prometheus scraping (GB)
@@ -89,7 +89,7 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-service-endpoints', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-nodes', 'kubernetes-pods') FACET service.name"
+        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-coredns', 'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints') FACET service.name"
       }
     }
 
@@ -103,7 +103,7 @@ resource "newrelic_one_dashboard" "data_ingest" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-service-endpoints', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-nodes', 'kubernetes-pods') FACET service.name TIMESERIES"
+        query      = "FROM Metric SELECT bytecountestimate()/1e9 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name IN ('otelcollector', 'kubernetes-nodes', 'kubernetes-nodes-cadvisor', 'kubernetes-apiservers', 'kubernetes-coredns', 'kubernetes-node-exporter', 'kubernetes-kube-state-metrics', 'kubernetes-service-endpoints') FACET service.name TIMESERIES"
       }
     }
 
