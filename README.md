@@ -162,6 +162,61 @@ helm upgrade ... \
 ...
 ```
 
+### Set service names for `node-exporter` & `kube-state-metrics`
+
+The `statefulset` collectors are designed to scrape `node-exporter` and `kube-state-metrics` decoupled from the rest of the service endpoints. Therefore, they need to know their service names. If you already have these in your cluster and you can refer to their service names:
+
+1. Define in `values.yaml`
+
+```yaml
+prometheus:
+  nodeExporterServiceName: <NODE_EXPORTER_SVC_NAME>
+  kubeStateMetricsServiceName: <KUBE_STATE_METRICS_SVC_NAME>
+```
+
+2. Set per `helm --set`
+
+```shell
+helm upgrade ... \
+...
+  --set statefulset.prometheus.nodeExporterServiceName=<NODE_EXPORTER_SVC_NAME> \
+  --set statefulset.prometheus.kubeStateMetricsServiceName=<KUBE_STATE_METRICS_SVC_NAME> \
+...
+```
+
+If you don't have `node-exporter` and `kube-state-metrics` in your cluster and if you are deploying the chart with the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh), you don't need to worry about all that.
+
+### Data ingest control
+
+Have full control over your data! Drop whatever you don't need. The Helm chart might cause a significant amount of data ingest when it is deployed with default values. The deployment with values is recommended for the start of the journey (and for troubleshooting) so that you familiarize yourself with all of the metrics and their labels. After you decide which metrics are crucial for you, simply drop the rest.
+
+The Helm chart is already built with 2 flags for this purpose:
+
+- `lowDataMode`: It increases the scrape duration for Prometheus collector instances so that the fetched data is ingested less frequently.
+- `importantMetricsOnly`: It only keeps and forwards the required metrics which are used in the [dashboards](./monitoring/terraform/).
+
+These flags are to be defined per each collecter type: `statefulset`, `deployment`, `daemonset`.
+
+1. Define in `values.yaml`
+
+```yaml
+prometheus:
+  lowDataMode: true
+  importantMetricsOnly: true
+```
+
+2. Set per `helm --set`
+
+```shell
+helm upgrade ... \
+...
+  --set statefulset.prometheus.lowDataMode=true \
+  --set statefulset.prometheus.importantMetricsOnly=true \
+...
+```
+
+Along with the [Terraform deployment](./monitoring/), a [data ingest](./monitoring/terraform/04_dashboard_data_ingest.tf) dashboard is created for you to keep track of which services is causing how much data ingest.
+
 ## Monitoring
 
 An example [monitoring](/monitoring/terraform/) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script.
