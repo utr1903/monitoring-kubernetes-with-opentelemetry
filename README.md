@@ -61,19 +61,22 @@ If you were to have 1 ops team & 2 dev teams and would like to send the telemetr
 
 you can use the following configuration for daemonset, deployment and statefulset:
 
-```
+```yaml
 opsteam:
   endpoint: "OTLP_ENDPOINT_OPS_TEAM"
-  licenseKey: "LICENSE_KEY_OPS_TEAM"
+  licenseKey:
+    value: "LICENSE_KEY_OPS_TEAM"
   namespaces: []
 devteam1:
   endpoint: "OTLP_ENDPOINT_DEV_TEAM_1"
-  licenseKey: "LICENSE_KEY_DEV_TEAM_1"
+  licenseKey:
+    value: "LICENSE_KEY_DEV_TEAM_1"
   namespaces:
     - namespace_of_dev_team_1
 devteam2:
   endpoint: "OTLP_ENDPOINT_DEV_TEAM_2"
-  licenseKey: "LICENSE_KEY_DEV_TEAM_2"
+  licenseKey:
+    value: "LICENSE_KEY_DEV_TEAM_2"
   namespaces:
     - namespace_of_dev_team_2
 ```
@@ -82,6 +85,8 @@ Since all of the telemetry data is centrally collected by 3 variations of collec
 
 - filtered by multiple processors depending on the config above
 - routed to corresponding exporters and thereby to corresponding New Relic accounts
+
+How to set up the license keys properly is explained [here](#setting-up-license-keys).
 
 ## Deploy!
 
