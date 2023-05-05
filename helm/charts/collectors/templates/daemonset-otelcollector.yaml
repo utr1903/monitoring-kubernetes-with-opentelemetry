@@ -219,7 +219,7 @@ spec:
               {{- $condition = printf "%s|%s" $condition $namespace -}}
             {{- end -}}
             {{- if eq $index (sub (len $teamInfo.namespaces) 1) -}}
-              {{- $condition = printf "%s\") == false" $condition -}}
+              {{- $condition = printf "%s\") == true" $condition -}}
             {{- end -}}
           {{- end -}}
             - '{{ $condition }}'
