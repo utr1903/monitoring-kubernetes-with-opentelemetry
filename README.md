@@ -224,25 +224,4 @@ Along with the [Terraform deployment](./monitoring/), a [data ingest](./monitori
 
 ## Monitoring
 
-An example [monitoring](/monitoring/terraform/) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script.
-
-Don't forget to define the name of the cluster that you would like to monitor:
-
-```shell
-clusterName="my-dope-cluster"
-```
-
-**Remark:** Keep in mind that this cluster name should match the one which you have run the `helm charts` with!
-
-Moreover, you will need to define the following variables within the `terraform` commands
-
-```shell
-terraform -chdir=../terraform plan \
-  -var NEW_RELIC_ACCOUNT_ID=$NEWRELIC_ACCOUNT_ID \
-  -var NEW_RELIC_API_KEY=$NEWRELIC_API_KEY \
-  -var NEW_RELIC_REGION=$NEWRELIC_REGION \
-  -var cluster_name=$clusterName \
-  -out "./tfplan"
-```
-
-where `NEW_RELIC_ACCOUNT_ID` corresponds to your New Relic account ID, `NEW_RELIC_API_KEY` to your [User API Key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key) and `NEWRELIC_REGION` to the data center region of your New Relic account (`us` or `eu`).
+An example [monitoring](/monitoring) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script. Check out the [`README`](./monitoring/README.md)!
