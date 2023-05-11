@@ -92,7 +92,7 @@ How to set up the license keys properly is explained [here](#setting-up-license-
 
 Feel free to customize the [Kubernetes manifest files](./helm/charts/collectors/templates/)! You can simply add your OTLP endpoints and license keys according to your New Relic accounts and run the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh).
 
-The script deploys `node-exporter` and `kube-state-metrics` with the OTel collectors which are required for the monitoring (see Monitoring section below).
+The script deploys `node-exporter` and `kube-state-metrics` with the OTel collectors which are **REQUIRED** for a complete monitoring (see [Monitoring](#monitoring) section below).
 
 Moreover, you will need to define a cluster name:
 
@@ -241,4 +241,4 @@ Along with the [Terraform deployment](./monitoring/), a [data ingest](./monitori
 
 ## Monitoring
 
-An example [monitoring](/monitoring) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script. Check out the [`README`](./monitoring/README.md)!
+An example [monitoring](/monitoring) is already prepared for you which you can deploy with Terraform to your New Relic account. For that, you can easily run the [`00_create_newrelic_resources.sh`](/monitoring/scripts/00_create_newrelic_resources.sh) script. Check out the [`README`](./monitoring/README.md) for more!
