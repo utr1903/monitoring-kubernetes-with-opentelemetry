@@ -112,9 +112,26 @@ helm upgrade ${otelcollectors[name]} \
 
 The cluster name that you define will be added as an additional attribute `k8s.cluster.name` to all of telemetry data which are collected by the collectors so that later, you can filter them out according to your various clusters.
 
-### Setting up license keys
+### Setting up OTLP endpoints & license keys
 
-There are 2 ways to set your New Relic license keys:
+If the New Relic account where you want to send the data to is
+
+- in US, use `otlp.nr-data.net:4317`
+- in EU, use `otlp.eu01.nr-data.net:4317`
+
+In the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh), the default value is set for EU as follows:
+
+````shell
+newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
+
+```shell
+helm upgrade ... \
+...
+--set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
+...
+````
+
+When it comes to defining the New Relic license keys, you have 2 ways:
 
 **Reference an existing secret**
 
