@@ -1,12 +1,12 @@
 #!/bin/bash
 
-### Set parameters
-newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
-
 ### Set variables
 
 # cluster name
 clusterName="my-dope-cluster"
+
+# New Relic OTLP endpoint
+newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 
 # kubestatemetrics
 declare -A kubestatemetrics

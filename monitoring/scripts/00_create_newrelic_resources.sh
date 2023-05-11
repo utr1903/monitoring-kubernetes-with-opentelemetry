@@ -19,11 +19,12 @@ done
 
 ### Set variables
 
+# cluster name
 clusterName="my-dope-cluster"
 
 if [[ $flagDestroy != "true" ]]; then
 
-  # Initialise Terraform
+  # Initialize Terraform
   terraform -chdir=../terraform init
 
   # Plan Terraform
@@ -42,8 +43,8 @@ else
 
   # Destroy Terraform
   terraform -chdir=../terraform destroy \
-  -var NEW_RELIC_ACCOUNT_ID=$NEWRELIC_ACCOUNT_ID \
-  -var NEW_RELIC_API_KEY=$NEWRELIC_API_KEY \
-  -var NEW_RELIC_REGION=$NEWRELIC_REGION \
-  -var cluster_name=$clusterName
+    -var NEW_RELIC_ACCOUNT_ID=$NEWRELIC_ACCOUNT_ID \
+    -var NEW_RELIC_API_KEY=$NEWRELIC_API_KEY \
+    -var NEW_RELIC_REGION=$NEWRELIC_REGION \
+    -var cluster_name=$clusterName
 fi
