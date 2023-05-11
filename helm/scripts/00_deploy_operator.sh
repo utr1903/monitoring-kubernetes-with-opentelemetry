@@ -15,9 +15,9 @@ oteloperator["namespace"]="monitoring"
 ###################
 
 # Add helm repos
-# helm repo add jetstack https://charts.jetstack.io
-# helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-# helm repo update
+helm repo add jetstack https://charts.jetstack.io
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
 
 # cert-manager
 helm upgrade ${certmanager[name]} \
