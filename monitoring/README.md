@@ -29,11 +29,14 @@ clusterName="my-dope-cluster"
 
 ## New Relic resources
 
-The `Terraform` deployment will create the following New Relic resources for you.
+The `Terraform` deployment will create the following New Relic resources for you:
+
+- [Dashboards](#dashboards)
+- [Alerts](#alerts)
 
 ### Dashboards
 
-**Cluster Overview - Nodes**
+[**Cluster Overview - Nodes**](/monitoring/terraform/04_dashboard_cluster_overview.tf)
 
 - Node capacities
 - Node to pod mapping
@@ -42,7 +45,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Cluster Overview - Nodes](/monitoring/docs/cluster_overview_nodes.png)
 
-**Cluster Overview - Namespaces**
+[**Cluster Overview - Namespaces**](/monitoring/terraform/04_dashboard_cluster_overview.tf)
 
 - Deployments, statefulsets & daemonsets
 - Pods with running, pending, failed & unknown statuses
@@ -51,7 +54,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Cluster Overview - Namespaces](/monitoring/docs/cluster_overview_namespaces.png)
 
-**Cluster Overview - Pods**
+[**Cluster Overview - Pods**](/monitoring/terraform/04_dashboard_cluster_overview.tf)
 
 - Containers & their statuses
 - Pods with running, pending, failed & unknown statuses
@@ -61,7 +64,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Cluster Overview - Pods](/monitoring/docs/cluster_overview_pods.png)
 
-**OTel Collectors Overview**
+[**OTel Collectors Overview**](/monitoring/terraform/04_dashboard_otel_collector.tf)
 
 - Collector node capacities & statuses
 - Pods with running, pending, failed & unknown statuses
@@ -73,7 +76,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 ![OTel Collectors Overview 1](/monitoring/docs/otel_collector_overview_1.png)
 ![OTel Collectors Overview 2](/monitoring/docs/otel_collector_overview_2.png)
 
-**Kube API Server Overview**
+[**Kube API Server Overview**](/monitoring/terraform/04_dashboard_kube_apiserver.tf)
 
 - Collector node capacities & statuses
 - Pods with running, pending, failed & unknown statuses
@@ -84,7 +87,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Kube API Server Overview](/monitoring/docs/kube_api_server_overview.png)
 
-**Core DNS Overview**
+[**Core DNS Overview**](/monitoring/terraform/04_dashboard_core_dns.tf)
 
 - Collector node capacities & statuses
 - Pods with running, pending, failed & unknown statuses
@@ -95,7 +98,7 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Core DNS Overview](/monitoring/docs/coredns_overview.png)
 
-**Data Ingest Overview**
+[**Data Ingest Overview**](/monitoring/terraform/04_dashboard_data_ingest.tf)
 
 - Ingest per telemetry type
 - Ingest of Prometheus scraping
@@ -104,3 +107,30 @@ The `Terraform` deployment will create the following New Relic resources for you
 
 ![Data Ingest Overview 1](/monitoring/docs/data_ingest_overview_1.png)
 ![Data Ingest Overview 2](/monitoring/docs/data_ingest_overview_2.png)
+
+### Alerts
+
+The alerts have predefined threshold. If those are not applicable for your use-cases, feel free to adapt them accordingly!
+
+[**Nodes**](/monitoring/terraform/05_alert_node.tf)
+
+- Status per instance remains not healthy for a certain amount of time
+- CPU utilization per instance exceeding a certain limit for a certain amount of time
+- Memory utilization per instance exceeding a certain limit for a certain amount of time
+- Storage utilization per instance exceeding a certain limit for a certain amount of time
+
+[**Pods**](/monitoring/terraform/05_alert_pod.tf)
+
+- Status per instance remains not healthy for a certain amount of time
+- CPU utilization per instance exceeding a certain limit for a certain amount of time
+- Memory utilization per instance exceeding a certain limit for a certain amount of time
+
+[**OTel Collector**](/monitoring/terraform/05_alert_otel_collector.tf)
+
+- CPU utilization per instance exceeding a certain limit for a certain amount of time
+- Memory utilization per instance exceeding a certain limit for a certain amount of time
+- Queue utilization per instance exceeding a certain limit for a certain amount of time
+- Dropped metrics/spans/logs per instance at least once
+- Enqueue failures metrics/spans/logs per instance at least once
+- Receive failures metrics/spans/logs per instance at least once
+- Export failures metrics/spans/logs per instance at least once
