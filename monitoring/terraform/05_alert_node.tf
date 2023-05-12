@@ -4,7 +4,7 @@
 
 # Policy - node resource consumption
 resource "newrelic_alert_policy" "node" {
-  name                = "K8s | ${var.cluster_name} | Nodes - Resource Consumption"
+  name                = "K8s | ${var.cluster_name} | Nodes"
   incident_preference = "PER_CONDITION"
 }
 
