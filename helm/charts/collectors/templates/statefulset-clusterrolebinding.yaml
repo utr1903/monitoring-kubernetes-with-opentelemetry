@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Values.name }}-sts
+  name: {{ include "nrotel.statefulsetName" . }}
   {{- if .Values.statefulset.clusterRoleBinding.annotations }}
   annotations:
     {{- range $key, $value := .Values.statefulset.clusterRoleBinding.annotations }}
@@ -12,9 +12,9 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Values.name }}-sts
+  name: {{ include "nrotel.statefulsetName" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.name }}-sts
+  name: {{ include "nrotel.statefulsetName" . }}
   namespace: {{ .Release.Namespace }}
 {{- end -}}
