@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-dep-exp
+  name: {{ include "nrotel.deploymentNameExporter" . }}
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -10,7 +10,7 @@ spec:
   mode: "deployment"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}-dep
+  serviceAccount: {{ include "nrotel.deploymentName" . }}
 
   # Ports to expose per service
   ports:
@@ -59,7 +59,7 @@ spec:
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}-dep-{{ $teamName }}
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
     {{- end }}
   {{- end }}

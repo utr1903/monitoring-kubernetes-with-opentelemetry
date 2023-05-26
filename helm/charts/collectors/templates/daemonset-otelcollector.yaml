@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-ds
+  name: {{ include "nrotel.daemonsetName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -10,7 +10,7 @@ spec:
   mode: "daemonset"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}-ds
+  serviceAccount: {{ include "nrotel.daemonsetName" . }}
 
   # Ports to expose per service
   ports:
@@ -77,7 +77,7 @@ spec:
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}-ds-{{ $teamName }}
+          name: {{ include "nrotel.daemonsetName" $ }}-{{ $teamName }}
           key: licenseKey
     {{- end }}
   {{- end }}

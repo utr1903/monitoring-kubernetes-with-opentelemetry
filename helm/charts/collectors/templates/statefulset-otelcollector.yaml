@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-sts
+  name: {{ include "nrotel.statefulsetName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -13,12 +13,12 @@ spec:
   replicas: 2
 
   # Service Account
-  serviceAccount: {{ .Values.name }}-sts
+  serviceAccount: {{ include "nrotel.statefulsetName" . }}
 
   # Target allocator
   targetAllocator:
     enabled: true
-    serviceAccount: {{ .Values.name }}-sts
+    serviceAccount: {{ include "nrotel.statefulsetName" . }}
     prometheusCR:
       enabled: false
 
@@ -69,7 +69,7 @@ spec:
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}-sts-{{ $teamName }}
+          name: {{ include "nrotel.statefulsetName" $ }}-{{ $teamName }}
           key: licenseKey
     {{- end }}
   {{- end }}
