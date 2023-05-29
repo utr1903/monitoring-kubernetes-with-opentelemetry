@@ -67,7 +67,6 @@ helm upgrade ${otelcollectors[name]} \
   --debug \
   --create-namespace \
   --namespace ${otelcollectors[namespace]} \
-  --set name=${otelcollectors[name]} \
   --set clusterName=$clusterName \
   --set traces.enabled=true \
   --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
