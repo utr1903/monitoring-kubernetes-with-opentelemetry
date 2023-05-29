@@ -4,6 +4,9 @@
 {{ if and (not .Values.traces.enabled) (not .Values.logs.enabled) (not .Values.metrics.enabled) -}}
   {{ fail "ERROR: At least one of the following must be enabled: traces, logs & metrics!" }}
 {{- end -}}
+{{ if not .Values.clusterName -}}
+  {{ fail "ERROR: Cluster name should be defined!" }}
+{{- end -}}
 {{ if .Values.traces.enabled -}}
   {{- if not .Values.deployment.newrelic -}}
     {{ fail "ERROR [DEPLOYMENT]: You have enabled traces but haven't defined any New Relic account in the deployment section to send the data to!" }}
