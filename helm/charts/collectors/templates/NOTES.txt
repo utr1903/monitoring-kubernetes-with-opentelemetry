@@ -13,7 +13,7 @@
   {{- end -}}
   {{- range $teamName, $teamInfo := .Values.deployment.newrelic -}}
     {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.eu01.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
@@ -27,7 +27,7 @@ Traces are enabled. Deployments of OTel collectors are deployed.
   {{- end -}}
   {{- range $teamName, $teamInfo := .Values.daemonset.newrelic -}}
     {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.eu01.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
@@ -41,7 +41,7 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
   {{- end -}}
   {{- range $teamName, $teamInfo := .Values.statefulset.newrelic -}}
     {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
-      {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.eu01.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
+      {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
     {{- end -}}
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
