@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .Values.name }}-dep-rec
+  name: {{ include "nrotel.deploymentNameReceiver" . }}
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -10,7 +10,7 @@ spec:
   mode: "deployment"
 
   # Service Account
-  serviceAccount: {{ .Values.name }}-dep
+  serviceAccount: {{ include "nrotel.deploymentName" . }}
 
   # Ports to expose per service
   ports:
@@ -60,7 +60,7 @@ spec:
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
-          name: {{ $.Values.name }}-dep-{{ $teamName }}
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
     {{- end }}
   {{- end }}
@@ -148,7 +148,7 @@ spec:
               insecure: true
         resolver:
           dns:
-            hostname: "{{ .Values.name }}-dep-exp-collector-headless.{{ .Release.Namespace }}.svc.cluster.local"
+            hostname: "{{ include "nrotel.headlessServiceNameExporter" . }}"
       otlp/opsteam:
         endpoint: ${opsteam-endpoint}
         tls:

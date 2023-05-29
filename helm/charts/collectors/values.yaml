@@ -1,7 +1,7 @@
 ### Variables
 
-# Name
-name: "nr-otel"
+# Override name
+nameOverride: null
 
 # Cluster name
 clusterName: "my-dope-cluster"
