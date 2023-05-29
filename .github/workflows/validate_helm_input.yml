@@ -1,0 +1,58 @@
+name: Validate Helm input
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-helm-input:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        cases:
+          - name: Cluster name should be defined
+            id: 01
+
+          - name: At least 1 telemetry type should be enabled
+            id: 02
+
+          - name: New Relic account should be defined - Deployment
+            id: 03
+
+          - name: New Relic account should be defined - Daemonset
+            id: 04
+
+          - name: New Relic account should be defined - Statefulset
+            id: 05
+
+          - name: OTLP endpoint should be valid - Deployment
+            id: 06
+            
+          - name: OTLP endpoint should be valid - Daemonset
+            id: 07
+
+          - name: OTLP endpoint should be valid - Statefulset
+            id: 08
+
+          - name: License key should be defined - Deployment
+            id: 09
+
+          - name: License key should be defined - Daemonset
+            id: 10
+
+          - name: License key should be defined - Statefulset
+            id: 11
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "v3.11.1"
+
+      - name: ${{ matrix.cases.name }}
+        shell: bash
+        run: ./tests/scripts/01_test_helm_inputs.sh --case ${{ matrix.cases.id }}
