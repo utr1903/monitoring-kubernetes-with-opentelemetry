@@ -2,18 +2,18 @@
 ### Alerts ###
 ##############
 
-# Policy - pod
+# Policy
 resource "newrelic_alert_policy" "pod" {
   name                = "K8s | ${var.cluster_name} | Pods"
   incident_preference = "PER_CONDITION"
 }
 
-# Condition - pod status
+# Condition - Status
 resource "newrelic_nrql_alert_condition" "pod_status" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.pod.id
   type                         = "static"
-  name                         = "Pod Status"
+  name                         = "Pod status"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -33,12 +33,12 @@ resource "newrelic_nrql_alert_condition" "pod_status" {
   aggregation_timer  = 5
 }
 
-# Condition - pod cpu utilization
-resource "newrelic_nrql_alert_condition" "pod_cpu_utilization" {
+# Condition - CPU utilization too high
+resource "newrelic_nrql_alert_condition" "pod_cpu_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.pod.id
   type                         = "static"
-  name                         = "CPU Utilization"
+  name                         = "CPU utilization too high"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -65,12 +65,12 @@ resource "newrelic_nrql_alert_condition" "pod_cpu_utilization" {
   aggregation_delay  = 0
 }
 
-# Condition - pod mem utilization
-resource "newrelic_nrql_alert_condition" "pod_mem_utilization" {
+# Condition - MEM utilization too high
+resource "newrelic_nrql_alert_condition" "pod_mem_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.pod.id
   type                         = "static"
-  name                         = "MEM Utilization"
+  name                         = "MEM utilization too high"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
