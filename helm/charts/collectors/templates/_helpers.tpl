@@ -18,7 +18,7 @@ Set name for deployment collectors.
 {{- printf "%s-%s" (include "nrotel.deploymentName" .) "exp" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- define "nrotel.headlessServiceNameExporter" -}}
-{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameExporter" .) "-collector-headless" "{{ .Release.Namespace }}" "svc.cluster.local" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameExporter" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
