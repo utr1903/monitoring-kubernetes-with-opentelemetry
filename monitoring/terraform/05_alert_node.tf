@@ -84,13 +84,6 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_low" {
     threshold_duration    = 43200
     threshold_occurrences = "all"
   }
-
-  warning {
-    operator              = "below"
-    threshold             = 30
-    threshold_duration    = 43200
-    threshold_occurrences = "all"
-  }
   fill_option        = "none"
   aggregation_window = 300
   aggregation_method = "event_flow"
@@ -148,13 +141,6 @@ resource "newrelic_nrql_alert_condition" "node_mem_utilization_low" {
     threshold_duration    = 43200
     threshold_occurrences = "all"
   }
-
-  warning {
-    operator              = "below"
-    threshold             = 50
-    threshold_duration    = 43200
-    threshold_occurrences = "all"
-  }
   fill_option        = "none"
   aggregation_window = 300
   aggregation_method = "event_flow"
@@ -209,13 +195,6 @@ resource "newrelic_nrql_alert_condition" "node_sto_utilization_low" {
   critical {
     operator              = "below"
     threshold             = 40
-    threshold_duration    = 43200
-    threshold_occurrences = "all"
-  }
-
-  warning {
-    operator              = "below"
-    threshold             = 50
     threshold_duration    = 43200
     threshold_occurrences = "all"
   }
