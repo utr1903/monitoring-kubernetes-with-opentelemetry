@@ -10,10 +10,15 @@ resource "newrelic_alert_policy" "node" {
 
 # Condition - Status
 resource "newrelic_nrql_alert_condition" "node_status" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "Node status"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "Node status"
+
+  description = <<-EOT
+  Your node is down!
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -35,10 +40,17 @@ resource "newrelic_nrql_alert_condition" "node_status" {
 
 # Condition - CPU utilization too high
 resource "newrelic_nrql_alert_condition" "node_cpu_utilization_high" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "CPU utilization too high"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "CPU utilization too high"
+
+  description = <<-EOT
+  Your node is about to reach its maximum CPU capacity!
+  - Check the workloads running on it to see which applications are consuming the most CPU.
+  - Check if your cluster scaler has already kicked in and provisioning an additional node.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -67,10 +79,18 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_high" {
 
 # Condition - CPU utilization too low
 resource "newrelic_nrql_alert_condition" "node_cpu_utilization_low" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "CPU utilization too low"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "CPU utilization too low"
+
+  description = <<-EOT
+  Your node is not benefiting from the CPU capacity it has been given!
+  - Check if your node is using its assigned memory properly.
+     - If yes, change your VM type. Pick yourself a memory-optimized VM in order not to pay for the unnecessary CPU which you don't use.
+     - If not, scale down your VM. Pick yourself a smaller VM to pay only for what you actually use.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -92,10 +112,17 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_low" {
 
 # Condition - MEM utilization too high
 resource "newrelic_nrql_alert_condition" "node_mem_utilization_high" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "MEM utilization too high"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "MEM utilization too high"
+
+  description = <<-EOT
+  Your node is about to reach its maximum memory capacity!
+  - Check the workloads running on it to see which applications are consuming the most memory.
+  - Check if your cluster scaler has already kicked in and provisioning an additional node.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -124,10 +151,18 @@ resource "newrelic_nrql_alert_condition" "node_mem_utilization_high" {
 
 # Condition - MEM utilization too low
 resource "newrelic_nrql_alert_condition" "node_mem_utilization_low" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "MEM utilization too low"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "MEM utilization too low"
+
+  description = <<-EOT
+  Your node is not benefiting from the memory capacity it has been given!
+  - Check if your node is using its CPU memory properly.
+     - If yes, change your VM type. Pick yourself a CPU-optimized VM in order not to pay for the unnecessary memory which you don't use.
+     - If not, scale down your VM. Pick yourself a smaller VM to pay only for what you actually use.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -149,10 +184,17 @@ resource "newrelic_nrql_alert_condition" "node_mem_utilization_low" {
 
 # Condition - STO utilization too high
 resource "newrelic_nrql_alert_condition" "node_sto_utilization_high" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "STO utilization too high"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "STO utilization too high"
+
+  description = <<-EOT
+  Your node is about to reach its maximum storage capacity!
+  - Check the workloads running on it to see which applications are consuming the most storage.
+  - Check if you can extend the underlying storage.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -181,10 +223,16 @@ resource "newrelic_nrql_alert_condition" "node_sto_utilization_high" {
 
 # Condition - STO utilization too low
 resource "newrelic_nrql_alert_condition" "node_sto_utilization_low" {
-  account_id                   = var.NEW_RELIC_ACCOUNT_ID
-  policy_id                    = newrelic_alert_policy.node.id
-  type                         = "static"
-  name                         = "STO utilization too low"
+  account_id = var.NEW_RELIC_ACCOUNT_ID
+  policy_id  = newrelic_alert_policy.node.id
+  type       = "static"
+  name       = "STO utilization too low"
+
+  description = <<-EOT
+  Your node is not benefiting from the storage capacity it has been given!
+  - Check what sort of IOPS your node is using on the disk and pick yourself a smaller disk.
+  EOT
+
   enabled                      = true
   violation_time_limit_seconds = 86400
 
