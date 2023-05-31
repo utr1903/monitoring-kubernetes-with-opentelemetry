@@ -2,7 +2,13 @@ name: Validate Helm input
 
 on:
   push:
+    paths:
+      - "helm/**"
+      - "tests/scripts/01_test_helm_inputs.sh"
   pull_request:
+    paths:
+      - "helm/**"
+      - "tests/scripts/01_test_helm_inputs.sh"
 
 jobs:
   validate-helm-input:
@@ -28,7 +34,7 @@ jobs:
 
           - name: OTLP endpoint should be valid - Deployment
             id: 06
-            
+
           - name: OTLP endpoint should be valid - Daemonset
             id: 07
 
