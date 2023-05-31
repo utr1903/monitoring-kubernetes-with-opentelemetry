@@ -65,6 +65,38 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization_high" {
   aggregation_delay  = 0
 }
 
+# Condition - CPU utilization too low
+resource "newrelic_nrql_alert_condition" "node_cpu_utilization_low" {
+  account_id                   = var.NEW_RELIC_ACCOUNT_ID
+  policy_id                    = newrelic_alert_policy.node.id
+  type                         = "static"
+  name                         = "CPU utilization too low"
+  enabled                      = true
+  violation_time_limit_seconds = 86400
+
+  nrql {
+    query = "FROM Metric SELECT rate(filter(sum(node_cpu_seconds), WHERE mode != 'idle'), 1 SECONDS)/uniqueCount(cpu)*100 WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
+  }
+
+  critical {
+    operator              = "below"
+    threshold             = 20
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+
+  warning {
+    operator              = "below"
+    threshold             = 30
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+  fill_option        = "none"
+  aggregation_window = 300
+  aggregation_method = "event_flow"
+  aggregation_delay  = 0
+}
+
 # Condition - MEM utilization too high
 resource "newrelic_nrql_alert_condition" "node_mem_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
@@ -97,6 +129,38 @@ resource "newrelic_nrql_alert_condition" "node_mem_utilization_high" {
   aggregation_delay  = 0
 }
 
+# Condition - MEM utilization too low
+resource "newrelic_nrql_alert_condition" "node_mem_utilization_low" {
+  account_id                   = var.NEW_RELIC_ACCOUNT_ID
+  policy_id                    = newrelic_alert_policy.node.id
+  type                         = "static"
+  name                         = "MEM utilization too low"
+  enabled                      = true
+  violation_time_limit_seconds = 86400
+
+  nrql {
+    query = "FROM Metric SELECT (100 * (1 - ((average(node_memory_MemFree_bytes) + average(node_memory_Cached_bytes) + average(node_memory_Buffers_bytes)) / average(node_memory_MemTotal_bytes)))) WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
+  }
+
+  critical {
+    operator              = "below"
+    threshold             = 40
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+
+  warning {
+    operator              = "below"
+    threshold             = 50
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+  fill_option        = "none"
+  aggregation_window = 300
+  aggregation_method = "event_flow"
+  aggregation_delay  = 0
+}
+
 # Condition - STO utilization too high
 resource "newrelic_nrql_alert_condition" "node_sto_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
@@ -125,6 +189,38 @@ resource "newrelic_nrql_alert_condition" "node_sto_utilization_high" {
   }
   fill_option        = "none"
   aggregation_window = 60
+  aggregation_method = "event_flow"
+  aggregation_delay  = 0
+}
+
+# Condition - STO utilization too low
+resource "newrelic_nrql_alert_condition" "node_sto_utilization_low" {
+  account_id                   = var.NEW_RELIC_ACCOUNT_ID
+  policy_id                    = newrelic_alert_policy.node.id
+  type                         = "static"
+  name                         = "STO utilization too low"
+  enabled                      = true
+  violation_time_limit_seconds = 86400
+
+  nrql {
+    query = "SELECT (1 - (average(node_filesystem_avail_bytes) / average(node_filesystem_size_bytes))) * 100 FROM Metric WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' FACET k8s.node.name"
+  }
+
+  critical {
+    operator              = "below"
+    threshold             = 40
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+
+  warning {
+    operator              = "below"
+    threshold             = 50
+    threshold_duration    = 43200
+    threshold_occurrences = "all"
+  }
+  fill_option        = "none"
+  aggregation_window = 300
   aggregation_method = "event_flow"
   aggregation_delay  = 0
 }
