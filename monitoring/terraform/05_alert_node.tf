@@ -2,18 +2,18 @@
 ### Alerts ###
 ##############
 
-# Policy - node resource consumption
+# Policy
 resource "newrelic_alert_policy" "node" {
   name                = "K8s | ${var.cluster_name} | Nodes"
   incident_preference = "PER_CONDITION"
 }
 
-# Condition - node status
+# Condition - Status
 resource "newrelic_nrql_alert_condition" "node_status" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.node.id
   type                         = "static"
-  name                         = "Node Status"
+  name                         = "Node status"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -33,12 +33,12 @@ resource "newrelic_nrql_alert_condition" "node_status" {
   aggregation_timer  = 5
 }
 
-# Condition - node cpu utilization
-resource "newrelic_nrql_alert_condition" "node_cpu_utilization" {
+# Condition - CPU utilization too high
+resource "newrelic_nrql_alert_condition" "node_cpu_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.node.id
   type                         = "static"
-  name                         = "CPU Utilization"
+  name                         = "CPU utilization too high"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -65,12 +65,12 @@ resource "newrelic_nrql_alert_condition" "node_cpu_utilization" {
   aggregation_delay  = 0
 }
 
-# Condition - node mem utilization
-resource "newrelic_nrql_alert_condition" "node_mem_utilization" {
+# Condition - MEM utilization too high
+resource "newrelic_nrql_alert_condition" "node_mem_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.node.id
   type                         = "static"
-  name                         = "MEM Utilization"
+  name                         = "MEM utilization too high"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
@@ -97,12 +97,12 @@ resource "newrelic_nrql_alert_condition" "node_mem_utilization" {
   aggregation_delay  = 0
 }
 
-# Condition - node sto utilization
-resource "newrelic_nrql_alert_condition" "node_sto_utilization" {
+# Condition - STO utilization too high
+resource "newrelic_nrql_alert_condition" "node_sto_utilization_high" {
   account_id                   = var.NEW_RELIC_ACCOUNT_ID
   policy_id                    = newrelic_alert_policy.node.id
   type                         = "static"
-  name                         = "STO Utilization"
+  name                         = "STO utilization too high"
   enabled                      = true
   violation_time_limit_seconds = 86400
 
