@@ -179,6 +179,18 @@ spec:
           exporters:
             - otlp/opsteam
             # - logging
+        metrics:
+          receivers:
+            - otlp
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+            - batch
+          exporters:
+            - otlp/opsteam
+            # - logging
         traces:
           receivers:
             - otlp
