@@ -27,8 +27,8 @@ dependencies:
   - name: prometheus-node-exporter
     version: 4.17.4
     repository: https://prometheus-community.github.io/helm-charts
-    condition: statefulset.prometheus.nodeExporter.serviceNameRef
+    condition: statefulset.prometheus.nodeExporter.enabled
   - name: kube-state-metrics
     version: 5.7.0
     repository: https://prometheus-community.github.io/helm-charts
-    condition: statefulset.prometheus.kubeStateMetrics.serviceNameRef
+    condition: statefulset.prometheus.kubeStateMetrics.enabled
