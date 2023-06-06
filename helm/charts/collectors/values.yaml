@@ -381,10 +381,24 @@ statefulset:
     lowDataMode: false
     # Keeps only the most important metrics and drops the rest of the scraped metrics
     importantMetricsOnly: false
-    # Node exporter service name
-    nodeExporterServiceName: nodeexporter-node-exporter
-    # Kube state metrics service name
-    kubeStateMetricsServiceName: kubestatemetrics-kube-state-metrics
+    # Node exporter specific configuration
+    nodeExporter:
+      # - If you don't have any node-exporter, you can let this chart deploy it as a dependency by setting
+      #   the field "enabled" to true. You can override its values in the DEPENDENCY CONFIG section of this file.
+      # - If you already have a node-exporter on your cluster, you can set the field "enabled" to false and give
+      #   its service name as a reference to the field "serviceNameRef". The collector will scrape that service and
+      #   will not deploy any node-exporter.
+      enabled: true
+      serviceNameRef: null
+    # Kube state metrics specific configuration
+    kubeStateMetrics:
+      # - If you don't have any kube-state-metrics, you can let this chart deploy it as a dependency by setting
+      #   the field "enabled" to true. You can override its values in the DEPENDENCY CONFIG section of this file.
+      # - If you already have a kube-state-metrics on your cluster, you can set the field "enabled" to false and give
+      #   its service name as a reference to the field "serviceNameRef". The collector will scrape that service and
+      #   will not deploy any kube-state-metrics.
+      enabled: true
+      serviceNameRef: null
 
   # New Relic account configuration
   newrelic:
@@ -429,3 +443,23 @@ statefulset:
     #     value: ""
     #   namespaces:
     #     - devteam2
+
+### DEPENDENCY CONFIG ###
+# You can override default values for the dependency helm charts in this section
+
+# Node exporter
+prometheus-node-exporter:
+  # Tolerations override
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+
+# Kube state metrics
+kube-state-metrics:
+  # Auto-sharding for horizontal scalibility
+  autosharding:
+    enabled: true

@@ -34,3 +34,25 @@ Set name for statefulset collectors.
 {{- define "nrotel.statefulsetName" -}}
 {{- printf "%s-%s" (include "nrotel.name" .) "sts" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Set name for node-exporter service discovery.
+*/}}
+{{- define "nrotel.nodeExporterServiceName" -}}
+{{- if .Values.statefulset.prometheus.nodeExporter.serviceNameRef -}}
+{{- printf "%s" .Values.statefulset.prometheus.nodeExporter.serviceNameRef | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "prometheus-node-exporter" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set name for kube-state-metrics service discovery.
+*/}}
+{{- define "nrotel.kubeStateMetricsServiceName" -}}
+{{- if .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef -}}
+{{- printf "%s" .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "kube-state-metrics" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
