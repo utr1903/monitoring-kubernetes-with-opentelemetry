@@ -186,14 +186,18 @@ helm upgrade ... \
 
 ### Set service names for `node-exporter` & `kube-state-metrics`
 
-The `statefulset` collectors are designed to scrape `node-exporter` and `kube-state-metrics` decoupled from the rest of the service endpoints. Therefore, they need to know their service names. If you already have these in your cluster and you can refer to their service names:
+The `statefulset` collectors are designed to scrape `node-exporter` and `kube-state-metrics` decoupled from the rest of the service endpoints. Therefore, they need to know their service names. If you already have these in your cluster, you can simply refer to their service names:
 
 1. Define in `values.yaml`
 
 ```yaml
 prometheus:
-  nodeExporterServiceName: <NODE_EXPORTER_SVC_NAME>
-  kubeStateMetricsServiceName: <KUBE_STATE_METRICS_SVC_NAME>
+  nodeExporter:
+    enabled: false
+    serviceNameRef: <NODE_EXPORTER_SVC_NAME>
+  kubeStateMetrics:
+    enabled: false
+    serviceNameRef: <KUBE_STATE_METRICS_SVC_NAME>
 ```
 
 2. Set per `helm --set`
@@ -201,12 +205,41 @@ prometheus:
 ```shell
 helm upgrade ... \
 ...
-  --set statefulset.prometheus.nodeExporterServiceName=<NODE_EXPORTER_SVC_NAME> \
-  --set statefulset.prometheus.kubeStateMetricsServiceName=<KUBE_STATE_METRICS_SVC_NAME> \
+  --set statefulset.prometheus.nodeExporter.enabled=false \
+  --set statefulset.prometheus.nodeExporter.serviceNameRef=<NODE_EXPORTER_SVC_NAME> \
+  --set statefulset.prometheus.kubeStateMetrics.enabled=false \
+  --set statefulset.prometheus.kubeStateMetrics.serviceNameRef=<KUBE_STATE_METRICS_SVC_NAME> \
 ...
 ```
 
-If you don't have `node-exporter` and `kube-state-metrics` in your cluster and if you are deploying the chart with the [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh), you don't need to worry about all that.
+If you don't have `node-exporter` and `kube-state-metrics` in your cluster, you can do the following:
+
+1. Define in `values.yaml`
+
+```yaml
+prometheus:
+  nodeExporter:
+    enabled: true
+  kubeStateMetrics:
+    enabled: true
+```
+
+2. Set per `helm --set`
+
+```shell
+helm upgrade ... \
+...
+  --set statefulset.prometheus.nodeExporter.enabled=true \
+  --set statefulset.prometheus.kubeStateMetrics.enabled=true \
+...
+```
+
+where the default values already enable both of them. You can find the helm dependencies of them [here](/helm/charts/collectors/Chart.yaml).
+
+Moreover, the script [`01_deploy_collectors.sh`](./helm/scripts/01_deploy_collectors.sh) already has both implementations for you.
+
+- If you run it without specifying anything, it will deploy the `node-exporter` and `kube-state-metrics` along with the collectors.
+- if you run it with the flag `--external`, it will first deploy the `node-exporter` and `kube-state-metrics` separately and then deploy the collectors by assigning their service names.
 
 ### Data ingest control
 
