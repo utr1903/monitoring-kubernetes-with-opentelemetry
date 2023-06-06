@@ -262,7 +262,7 @@ spec:
                   replacement: $$1:$$2
                 - source_labels: [__meta_kubernetes_service_name]
                   action: keep
-                  regex: {{ .Values.statefulset.prometheus.nodeExporterServiceName }}
+                  regex: {{ include "nrotel.nodeExporterServiceName" . }}
                 - source_labels: [__meta_kubernetes_namespace]
                   action: replace
                   target_label: namespace
@@ -313,7 +313,7 @@ spec:
                   replacement: $$1:$$2
                 - source_labels: [__meta_kubernetes_service_name]
                   action: keep
-                  regex: {{ .Values.statefulset.prometheus.kubeStateMetricsServiceName }}
+                  regex: {{ include "nrotel.kubeStateMetricsServiceName" . }}
                 - source_labels: [__meta_kubernetes_namespace]
                   action: replace
                   target_label: namespace
@@ -367,10 +367,10 @@ spec:
                   regex: kube-dns
                 - source_labels: [__meta_kubernetes_service_name]
                   action: drop
-                  regex: {{ .Values.statefulset.prometheus.nodeExporterServiceName }}
+                  regex: {{ include "nrotel.nodeExporterServiceName" . }}
                 - source_labels: [__meta_kubernetes_service_name]
                   action: drop
-                  regex: {{ .Values.statefulset.prometheus.kubeStateMetricsServiceName }}
+                  regex: {{ include "nrotel.kubeStateMetricsServiceName" . }}
                 - source_labels: [__meta_kubernetes_namespace]
                   action: replace
                   target_label: namespace
