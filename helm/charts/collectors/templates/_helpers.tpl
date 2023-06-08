@@ -18,7 +18,7 @@ Set name for deployment collectors.
 {{- printf "%s-%s" (include "nrotel.deploymentName" .) "exp" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- define "nrotel.headlessServiceNameExporter" -}}
-{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameExporter" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameExporter" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -40,9 +40,9 @@ Set name for node-exporter service discovery.
 */}}
 {{- define "nrotel.nodeExporterServiceName" -}}
 {{- if .Values.statefulset.prometheus.nodeExporter.serviceNameRef -}}
-{{- printf "%s" .Values.statefulset.prometheus.nodeExporter.serviceNameRef | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s" .Values.statefulset.prometheus.nodeExporter.serviceNameRef | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" (include "nrotel.name" .) "prometheus-node-exporter" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "prometheus-node-exporter" | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -51,8 +51,8 @@ Set name for kube-state-metrics service discovery.
 */}}
 {{- define "nrotel.kubeStateMetricsServiceName" -}}
 {{- if .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef -}}
-{{- printf "%s" .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s" .Values.statefulset.prometheus.kubeStateMetrics.serviceNameRef | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" (include "nrotel.name" .) "kube-state-metrics" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "nrotel.name" .) "kube-state-metrics" | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
