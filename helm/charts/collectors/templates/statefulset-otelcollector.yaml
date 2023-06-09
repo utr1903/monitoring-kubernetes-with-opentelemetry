@@ -424,18 +424,23 @@ spec:
         error_mode: ignore
         metrics:
           datapoint:
-          {{ $condition := "IsMatch(attributes[\"namespace\"], " -}}
+          {{ $conditionForNamespace := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
-              {{- $condition = printf "%s\"%s" $condition $namespace -}}
+              {{- $conditionForNamespace = printf "attributes[\"namespace\"] != \"%s\"" $namespace -}}
             {{ else }}
-              {{- $condition = printf "%s|%s" $condition $namespace -}}
-            {{- end -}}
-            {{- if eq $index (sub (len $teamInfo.namespaces) 1) -}}
-              {{- $condition = printf "%s\") == false" $condition -}}
+              {{- $conditionForNamespace = printf "%s and attributes[\"namespace\"] != \"%s\"" $conditionForNamespace $namespace -}}
             {{- end -}}
           {{- end -}}
-            - '{{ $condition }}'
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '(resource.attributes["service.name"] != "kubernetes-nodes-cadvisor" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-kube-state-metrics" or ({{ $conditionForNamespace }})) and (resource.attributes["service.name"] != "kubernetes-service-endpoints" or ({{ $conditionForK8sNamespaceName }}))'
       {{- end }}
       {{- end }}
       memory_limiter:
