@@ -191,7 +191,7 @@ if [[ $case == "12" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
 
 # Daemonset
@@ -206,7 +206,7 @@ if [[ $case == "13" ]]; then
     --set daemonset.newrelic.opsteam.licenseKey.secretRef.key="key" \
     --set metrics.enabled=false \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
 
 # Statefulset
@@ -221,7 +221,7 @@ if [[ $case == "14" ]]; then
     --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
     --set statefulset.newrelic.opsteam.licenseKey.secretRef.key="key" \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
 
 ### Case 15, 16, 17 - License key reference should have a key
@@ -238,7 +238,7 @@ if [[ $case == "15" ]]; then
     --set logs.enabled=false \
     --set metrics.enabled=false \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
 
 # Daemonset
@@ -253,7 +253,7 @@ if [[ $case == "16" ]]; then
     --set daemonset.newrelic.opsteam.licenseKey.secretRef.name="name" \
     --set metrics.enabled=false \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
 
 # Statefulset
@@ -268,8 +268,9 @@ if [[ $case == "17" ]]; then
     --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
     --set statefulset.newrelic.opsteam.licenseKey.secretRef.name="name" \
     "../../helm/charts/collectors" \
-    1> /dev/null)
+    2> /dev/null)
 fi
+
 # All of the cases are implemented to output an error as a result.
 # If there is no error, the result would be an empty string.
 # -> This means that the test case has failed to validate.
