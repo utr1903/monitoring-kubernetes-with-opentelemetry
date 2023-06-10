@@ -119,8 +119,8 @@ deployment:
         secretRef: null
           # name: ""
           # key: ""
-      # Namespaces to filter the gathered metrics
-      # -> If nothing is defined, all metrics will be sent
+      # Namespaces to filter the gathered telemetry data
+      # -> If nothing is defined, all telemetry data will be sent
       namespaces: []
 
     # # If you want to send the namespaced telemetry data from the
@@ -230,8 +230,8 @@ daemonset:
         secretRef: null
           # name: ""
           # key: ""
-      # Namespaces to filter the gathered metrics
-      # -> If nothing is defined, all metrics will be sent
+      # Namespaces to filter the gathered telemetry data
+      # -> If nothing is defined, all telemetry data will be sent
       namespaces: []
 
     # # If you want to send the namespaced telemetry data from the
@@ -420,8 +420,8 @@ statefulset:
         secretRef: null
           # name: ""
           # key: ""
-      # Namespaces to filter the gathered metrics
-      # -> If nothing is defined, all metrics will be sent
+      # Namespaces to filter the gathered telemetry data
+      # -> If nothing is defined, all telemetry data will be sent
       namespaces: []
 
     # # If you want to send the namespaced telemetry data from the
