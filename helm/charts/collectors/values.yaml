@@ -17,6 +17,58 @@ traces:
 metrics:
   enabled: true
 
+### GLOBAL CONFIG ###
+# Global config for ease of use to apply to all collector types.
+global:
+
+  # New Relic account configuration
+  newrelic:
+    # Flag to enable global New Relic configuration.
+    # -> If it is enabled, the individual New Relic sections for deployment, daemonset
+    #    and statefulset will be ignored
+    enabled: false
+    # OTLP endpoint for all New Relic accounts
+    # For US accounts -> otlp.nr-data.net:4317
+    # For EU accounts -> otlp.eu01.nr-data.net:4317
+    endpoint: "otlp.nr-data.net:4317"
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
+
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
+
 ### DEPLOYMENT CONFIG ###
 # This configuration creates 2 collectors as Kubernetes deployments:
 # - receiver
@@ -100,6 +152,7 @@ deployment:
     importantMetricsOnly: false
 
   # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
     # OPS team which is responsible for the cluster and common apps
     # running on it.
@@ -211,6 +264,7 @@ daemonset:
     importantMetricsOnly: false
 
   # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
     # OPS team which is responsible for the cluster and common apps
     # running on it.
@@ -401,6 +455,7 @@ statefulset:
       serviceNameRef: null
 
   # New Relic account configuration
+  # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
     # OPS team which is responsible for the cluster and common apps
     # running on it.
