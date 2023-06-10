@@ -30,9 +30,9 @@ If any telemetry type is enabled, it also has to have a New Relic block defined 
 | `daemonset`  | `04` |
 | `statefulet` | `05` |
 
-### Case 06, 07, 08 - OTLP endpoint should be valid
+### Case 06, 07, 08 - OTLP endpoint should be valid (global)
 
-If any telemetry type is enabled, the OTLP endpoint of the corresponding New Relic account should be valid where
+If any telemetry type and global config are enabled, the OTLP endpoint of the corresponding New Relic account should be valid where
 
 - US -> `otlp.nr-data.net:4317`
 - EU -> `otlp.eu01.nr-data.net:4317`
@@ -43,9 +43,12 @@ If any telemetry type is enabled, the OTLP endpoint of the corresponding New Rel
 | `daemonset`  | `07` |
 | `statefulet` | `08` |
 
-### Case 09, 10, 11 - License key should be defined
+### Case 09, 10, 11 - OTLP endpoint should be valid (individual)
 
-If any telemetry type is enabled, the license key of the corresponding New Relic account should either be defined directly by providing the value to the helm chart or by referencing an existing secret which holds the license key.
+If any telemetry type is enabled and individual configs are used, the OTLP endpoint of the corresponding New Relic account should be valid where
+
+- US -> `otlp.nr-data.net:4317`
+- EU -> `otlp.eu01.nr-data.net:4317`
 
 | K8s object   | Case |
 | ------------ | ---- |
@@ -53,9 +56,9 @@ If any telemetry type is enabled, the license key of the corresponding New Relic
 | `daemonset`  | `10` |
 | `statefulet` | `11` |
 
-### Case 12, 13, 14 - License key reference should have a name
+### Case 12, 13, 14 - License key should be defined (global)
 
-If the license key of the corresponding New Relic account is defined by referencing an existing secret which holds the license key, the name of the secret should be given.
+If any telemetry type and global config are enabled, the license key of the corresponding New Relic account should either be defined directly by providing the value to the helm chart or by referencing an existing secret which holds the license key.
 
 | K8s object   | Case |
 | ------------ | ---- |
@@ -63,12 +66,52 @@ If the license key of the corresponding New Relic account is defined by referenc
 | `daemonset`  | `13` |
 | `statefulet` | `14` |
 
-### Case 15, 16, 17 - License key reference should have a key
+### Case 15, 16, 17 - License key should be defined (individual)
 
-If the license key of the corresponding New Relic account is defined by referencing an existing secret which holds the license key, the key in itself that points to the license key should be given.
+If any telemetry type is enabled and individual configs are used, the license key of the corresponding New Relic account should either be defined directly by providing the value to the helm chart or by referencing an existing secret which holds the license key.
 
 | K8s object   | Case |
 | ------------ | ---- |
 | `deployment` | `15` |
 | `daemonset`  | `16` |
 | `statefulet` | `17` |
+
+### Case 18, 19, 20 - License key reference should have a name (global)
+
+If the license key of the corresponding New Relic account is defined globally by referencing an existing secret which holds the license key, the name of the secret should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `18` |
+| `daemonset`  | `19` |
+| `statefulet` | `20` |
+
+### Case 21, 22, 23 - License key reference should have a name (individual)
+
+If the license key of the corresponding New Relic account is defined individually by referencing an existing secret which holds the license key, the name of the secret should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `21` |
+| `daemonset`  | `22` |
+| `statefulet` | `23` |
+
+### Case 24, 25, 26 - License key reference should have a key (global)
+
+If the license key of the corresponding New Relic account is defined globally by referencing an existing secret which holds the license key, the key in itself that points to the license key should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `24` |
+| `daemonset`  | `25` |
+| `statefulet` | `26` |
+
+### Case 27, 28, 29 - License key reference should have a key (individual)
+
+If the license key of the corresponding New Relic account is defined individually by referencing an existing secret which holds the license key, the key in itself that points to the license key should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `27` |
+| `daemonset`  | `28` |
+| `statefulet` | `29` |
