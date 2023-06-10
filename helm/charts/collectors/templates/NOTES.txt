@@ -18,6 +18,14 @@
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [DEPLOYMENT]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
     {{- end -}}
+    {{- if $teamInfo.licenseKey.secretRef }}
+      {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+        {{ fail "ERROR [DEPLOYMENT]: License key is referenced but its name is not provided!" }}
+      {{- end -}}
+      {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+        {{ fail "ERROR [DEPLOYMENT]: License key is referenced but the key to the license key within the secret is not provided!" }}
+      {{- end -}}
+    {{- end -}}
   {{- end }}
 Traces are enabled. Deployments of OTel collectors are deployed.
 {{- end -}}
@@ -32,6 +40,14 @@ Traces are enabled. Deployments of OTel collectors are deployed.
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [DAEMONSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
     {{- end -}}
+    {{- if $teamInfo.licenseKey.secretRef }}
+      {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+        {{ fail "ERROR [DAEMONSET]: License key is referenced but its name is not provided!" }}
+      {{- end -}}
+      {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+        {{ fail "ERROR [DAEMONSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+      {{- end -}}
+    {{- end -}}
   {{- end }}
 Logs are enabled. Daemonset of OTel collectors are deployed.
 {{- end -}}
@@ -45,6 +61,14 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
     {{- end -}}
     {{- if and (not $teamInfo.licenseKey.secretRef) (not $teamInfo.licenseKey.value) }}
       {{ fail "ERROR [STATEFULSET]: Neither a license key secret is referenced nor the value of the license key is provided!" }}
+    {{- end -}}
+    {{- if $teamInfo.licenseKey.secretRef }}
+      {{- if (not $teamInfo.licenseKey.secretRef.name) }}
+        {{ fail "ERROR [STATEFULSET]: License key is referenced but its name is not provided!" }}
+      {{- end -}}
+      {{- if (not $teamInfo.licenseKey.secretRef.key) }}
+        {{ fail "ERROR [STATEFULSET]: License key is referenced but the key to the license key within the secret is not provided!" }}
+      {{- end -}}
     {{- end -}}
   {{- end }}
 Metrics are enabled. Statefulset of OTel collectors are deployed.

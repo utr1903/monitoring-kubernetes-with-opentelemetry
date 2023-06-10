@@ -50,6 +50,24 @@ jobs:
           - name: License key should be defined - Statefulset
             id: 11
 
+          - name: Referenced license key should have a name - Deployment
+            id: 12
+
+          - name: Referenced license key should have a name - Daemonset
+            id: 13
+
+          - name: Referenced license key should have a name - Statefulset
+            id: 14
+
+          - name: Referenced license key should have a key - Deployment
+            id: 15
+
+          - name: Referenced license key should have a key - Daemonset
+            id: 16
+
+          - name: Referenced license key should have a key - Statefulset
+            id: 17
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3

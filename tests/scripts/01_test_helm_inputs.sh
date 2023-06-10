@@ -133,7 +133,7 @@ if [[ $case == "08" ]]; then
     2> /dev/null)
 fi
 
-### Case 09, 10, 11 - Invalid license key
+### Case 09, 10, 11 - License key should be defined
 
 # Deployment
 if [[ $case == "09" ]]; then
@@ -177,6 +177,102 @@ if [[ $case == "11" ]]; then
     2> /dev/null)
 fi
 
+### Case 12, 13, 14 - License key reference should have a name
+
+# Deployment
+if [[ $case == "12" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=true \
+    --set deployment.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set deployment.newrelic.opsteam.licenseKey.secretRef.key="key" \
+    --set logs.enabled=false \
+    --set metrics.enabled=false \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+
+# Daemonset
+if [[ $case == "13" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=false \
+    --set logs.enabled=true \
+    --set daemonset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set daemonset.newrelic.opsteam.licenseKey.secretRef.key="key" \
+    --set metrics.enabled=false \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+
+# Statefulset
+if [[ $case == "14" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=false \
+    --set logs.enabled=false \
+    --set metrics.enabled=true \
+    --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set statefulset.newrelic.opsteam.licenseKey.secretRef.key="key" \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+
+### Case 15, 16, 17 - License key reference should have a key
+
+# Deployment
+if [[ $case == "15" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=true \
+    --set deployment.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set deployment.newrelic.opsteam.licenseKey.secretRef.name="name" \
+    --set logs.enabled=false \
+    --set metrics.enabled=false \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+
+# Daemonset
+if [[ $case == "16" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=false \
+    --set logs.enabled=true \
+    --set daemonset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set daemonset.newrelic.opsteam.licenseKey.secretRef.name="name" \
+    --set metrics.enabled=false \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+
+# Statefulset
+if [[ $case == "17" ]]; then
+  result=$(helm template ${otelcollectors[name]} \
+    --create-namespace \
+    --namespace ${otelcollectors[namespace]} \
+    --set clusterName=$clusterName \
+    --set traces.enabled=false \
+    --set logs.enabled=false \
+    --set metrics.enabled=true \
+    --set statefulset.newrelic.opsteam.endpoint="otlp.nr-data.net:4317" \
+    --set statefulset.newrelic.opsteam.licenseKey.secretRef.name="name" \
+    "../../helm/charts/collectors" \
+    1> /dev/null)
+fi
+# All of the cases are implemented to output an error as a result.
+# If there is no error, the result would be an empty string.
+# -> This means that the test case has failed to validate.
 if [[ $result != "" ]]; then
   echo "Validation failed!"
   exit 1

@@ -52,3 +52,23 @@ If any telemetry type is enabled, the license key of the corresponding New Relic
 | `deployment` | `09` |
 | `daemonset`  | `10` |
 | `statefulet` | `11` |
+
+### Case 12, 13, 14 - License key reference should have a name
+
+If the license key of the corresponding New Relic account is defined by referencing an existing secret which holds the license key, the name of the secret should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `12` |
+| `daemonset`  | `13` |
+| `statefulet` | `14` |
+
+### Case 15, 16, 17 - License key reference should have a key
+
+If the license key of the corresponding New Relic account is defined by referencing an existing secret which holds the license key, the key in itself that points to the license key should be given.
+
+| K8s object   | Case |
+| ------------ | ---- |
+| `deployment` | `15` |
+| `daemonset`  | `16` |
+| `statefulet` | `17` |
