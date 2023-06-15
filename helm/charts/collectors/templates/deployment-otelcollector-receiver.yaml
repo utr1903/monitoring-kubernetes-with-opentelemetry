@@ -46,7 +46,7 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
   {{- if eq $teamName "opsteam" }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
