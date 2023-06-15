@@ -62,29 +62,63 @@ If you were to have 1 ops team & 2 dev teams and would like to send the telemetr
 you can use the following configuration for daemonset, deployment and statefulset:
 
 ```yaml
-opsteam:
-  endpoint: "OTLP_ENDPOINT_OPS_TEAM"
-  licenseKey:
-    value: "LICENSE_KEY_OPS_TEAM"
-  namespaces: []
-devteam1:
-  endpoint: "OTLP_ENDPOINT_DEV_TEAM_1"
-  licenseKey:
-    value: "LICENSE_KEY_DEV_TEAM_1"
-  namespaces:
-    - namespace_of_dev_team_1
-devteam2:
-  endpoint: "OTLP_ENDPOINT_DEV_TEAM_2"
-  licenseKey:
-    value: "LICENSE_KEY_DEV_TEAM_2"
-  namespaces:
-    - namespace_of_dev_team_2
+statefulset: # also deployment or daemonset
+  newrelic:
+    teams:
+      opsteam:
+        endpoint: "OTLP_ENDPOINT_OPS_TEAM"
+        licenseKey:
+          value: "LICENSE_KEY_OPS_TEAM"
+        namespaces: []
+      devteam1:
+        endpoint: "OTLP_ENDPOINT_DEV_TEAM_1"
+        licenseKey:
+          value: "LICENSE_KEY_DEV_TEAM_1"
+        namespaces:
+          - namespace-devteam-1
+      devteam2:
+        endpoint: "OTLP_ENDPOINT_DEV_TEAM_2"
+        licenseKey:
+          value: "LICENSE_KEY_DEV_TEAM_2"
+        namespaces:
+          - namespace-devteam-2
 ```
 
 Since all of the telemetry data is centrally collected by 3 variations of collectors, each variation can filter the data according to the namespaces where the data is coming from. So centrally gathered data will be
 
 - filtered by multiple processors depending on the config above
 - routed to corresponding exporters and thereby to corresponding New Relic accounts
+
+The configuration above is the default way of setting up individual accounts to export the telemetry data.
+
+If,
+
+- all of your New Relic accounts are in the same New Relic datacenter (US or EU)
+- the individual teams are to be given only the telemetry data which belong to their namespaces
+
+you can simplify the deployment per the global configuration as follows:
+
+```yaml
+global:
+  enabled: true
+  endpoint: "OTLP_ENDPOINT_FOR_ALL_ACCOUNTS"
+  newrelic:
+    teams:
+      opsteam:
+        licenseKey:
+          value: "LICENSE_KEY_OPS_TEAM"
+        namespaces: []
+      devteam1:
+        licenseKey:
+          value: "LICENSE_KEY_DEV_TEAM_1"
+        namespaces:
+          - namespace-devteam-1
+      devteam2:
+        licenseKey:
+          value: "LICENSE_KEY_DEV_TEAM_2"
+        namespaces:
+          - namespace-devteam-2
+```
 
 How to set up the license keys properly is explained [here](#setting-up-license-keys).
 
@@ -127,7 +161,7 @@ newrelicOtlpEndpoint="otlp.eu01.nr-data.net:4317"
 ```shell
 helm upgrade ... \
 ...
---set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
+--set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
 ...
 ````
 
@@ -141,12 +175,13 @@ If you already have put your secrets into a Kubernetes secret within the same na
 
 ```yaml
 newrelic:
-  opsteam:
-    endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
-    licenseKey:
-      secretRef:
-        name: "<YOUR_EXISTING_SECRET>"
-        key: "<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>"
+  teams:
+    opsteam:
+      endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
+      licenseKey:
+        secretRef:
+          name: "<YOUR_EXISTING_SECRET>"
+          key: "<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>"
 ```
 
 2. Set per `helm --set`
@@ -154,9 +189,9 @@ newrelic:
 ```shell
 helm upgrade ... \
 ...
---set statefulset.newrelic.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
---set statefulset.newrelic.opsteam.licenseKey.secretRef.name="<YOUR_EXISTING_SECRET>" \
---set statefulset.newrelic.opsteam.licenseKey.secretRef.key="<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>" \
+--set statefulset.newrelic.teams.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
+--set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.name="<YOUR_EXISTING_SECRET>" \
+--set statefulset.newrelic.teams.opsteam.licenseKey.secretRef.key="<KEY_TO_LICENSE_KEY_WITHIN_THE_SECRET>" \
 ...
 ```
 
@@ -168,10 +203,11 @@ If you haven't defined any secret for your license key and want to create it fro
 
 ```yaml
 newrelic:
-  opsteam:
-    endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
-    licenseKey:
-      value: "<YOUR_EXISTING_SECRET>"
+  teams:
+    opsteam:
+      endpoint: "<NEW_RELIC_OTLP_ENDPOINT>"
+      licenseKey:
+        value: "<YOUR_EXISTING_SECRET>"
 ```
 
 2. Set per `helm --set`
@@ -179,8 +215,8 @@ newrelic:
 ```shell
 helm upgrade ... \
 ...
---set statefulset.newrelic.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
---set statefulset.newrelic.opsteam.licenseKey.value="<NEW_RELIC_LICENSE_KEY>" \
+--set statefulset.newrelic.teams.opsteam.endpoint="<NEW_RELIC_OTLP_ENDPOINT>" \
+--set statefulset.newrelic.teams.opsteam.licenseKey.value="<NEW_RELIC_LICENSE_KEY>" \
 ...
 ```
 

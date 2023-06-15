@@ -88,20 +88,20 @@ if [[ $externalNodeExporterAndKubeStateMetrics == "true" ]]; then
     --set clusterName=$clusterName \
     --set traces.enabled=true \
     --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
-    --set deployment.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set deployment.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     --set logs.enabled=true \
     --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
-    --set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set daemonset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set daemonset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     --set metrics.enabled=true \
     --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
     --set statefulset.prometheus.nodeExporter.enabled=false \
     --set statefulset.prometheus.nodeExporter.serviceNameRef="${nodeexporter[name]}-${nodeexporter[remoteChartName]}" \
     --set statefulset.prometheus.kubeStateMetrics.enabled=false \
     --set statefulset.prometheus.kubeStateMetrics.serviceNameRef="${kubestatemetrics[name]}-${kubestatemetrics[remoteChartName]}" \
-    --set statefulset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set statefulset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set statefulset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set statefulset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     "../charts/collectors"
 
 # If the flag "external" is not set, deploy the node-exporter and
@@ -118,15 +118,15 @@ else
     --set clusterName=$clusterName \
     --set traces.enabled=true \
     --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
-    --set deployment.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set deployment.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     --set logs.enabled=true \
     --set daemonset.ports.prometheus.port=${otelcollectors[daemonsetPrometheusPort]} \
-    --set daemonset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set daemonset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set daemonset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set daemonset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     --set metrics.enabled=true \
     --set statefulset.ports.prometheus.port=${otelcollectors[statefulsetPrometheusPort]} \
-    --set statefulset.newrelic.opsteam.endpoint=$newrelicOtlpEndpoint \
-    --set statefulset.newrelic.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
+    --set statefulset.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
+    --set statefulset.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \
     "../charts/collectors"
 fi
