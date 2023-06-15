@@ -154,47 +154,49 @@ deployment:
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
-    # OPS team which is responsible for the cluster and common apps
-    # running on it.
-    opsteam:
-      # OTLP endpoint
-      # For US accounts -> otlp.nr-data.net:4317
-      # For EU accounts -> otlp.eu01.nr-data.net:4317
-      endpoint: "otlp.nr-data.net:4317"
-      # New Relic ingest license key
-      # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
-      licenseKey:
-        # If you want to create a new secret, provide to the license key as a Helm value.
-        value: ""
-        # If you already have your license key as a secret stored within the same
-        # namespace as this Helm deployment, provide the secret name and the key to
-        # license key.
-        secretRef: null
-          # name: ""
-          # key: ""
-      # Namespaces to filter the gathered telemetry data
-      # -> If nothing is defined, all telemetry data will be sent
-      namespaces: []
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
 
-    # # If you want to send the namespaced telemetry data from the
-    # # cluster to the accounts of the individual dev teams
-    # # comment in below.
-    # # Dev team 1 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam1:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam1
-    # # Dev team 2 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam2:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam2
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
 
 ### DAEMONSET CONFIG ###
 # This configuration is responsible for collecting the logs from the
@@ -266,47 +268,49 @@ daemonset:
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
-    # OPS team which is responsible for the cluster and common apps
-    # running on it.
-    opsteam:
-      # OTLP endpoint
-      # For US accounts -> otlp.nr-data.net:4317
-      # For EU accounts -> otlp.eu01.nr-data.net:4317
-      endpoint: "otlp.nr-data.net:4317"
-      # New Relic ingest license key
-      # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
-      licenseKey:
-        # If you want to create a new secret, provide to the license key as a Helm value.
-        value: ""
-        # If you already have your license key as a secret stored within the same
-        # namespace as this Helm deployment, provide the secret name and the key to
-        # license key.
-        secretRef: null
-          # name: ""
-          # key: ""
-      # Namespaces to filter the gathered telemetry data
-      # -> If nothing is defined, all telemetry data will be sent
-      namespaces: []
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
 
-    # # If you want to send the namespaced telemetry data from the
-    # # cluster to the accounts of the individual dev teams
-    # # comment in below.
-    # # Dev team 1 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam1:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam1
-    # # Dev team 2 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam2:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam2
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
 
 ### STATEFULSET CONFIG ###
 # This configuration is responsible for scraping the metrics from the
@@ -457,47 +461,49 @@ statefulset:
   # New Relic account configuration
   # -> If the global New Relic configuration is enabled, this section will be ignored
   newrelic:
-    # OPS team which is responsible for the cluster and common apps
-    # running on it.
-    opsteam:
-      # OTLP endpoint
-      # For US accounts -> otlp.nr-data.net:4317
-      # For EU accounts -> otlp.eu01.nr-data.net:4317
-      endpoint: "otlp.nr-data.net:4317"
-      # New Relic ingest license key
-      # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
-      licenseKey:
-        # If you want to create a new secret, provide to the license key as a Helm value.
-        value: ""
-        # If you already have your license key as a secret stored within the same
-        # namespace as this Helm deployment, provide the secret name and the key to
-        # license key.
-        secretRef: null
-          # name: ""
-          # key: ""
-      # Namespaces to filter the gathered telemetry data
-      # -> If nothing is defined, all telemetry data will be sent
-      namespaces: []
+    # Teams to segragete the telemetry data received by all of the collectors.
+    teams:
+      # OPS team which is responsible for the cluster and common apps
+      # running on it.
+      opsteam:
+        # OTLP endpoint
+        # For US accounts -> otlp.nr-data.net:4317
+        # For EU accounts -> otlp.eu01.nr-data.net:4317
+        endpoint: "otlp.nr-data.net:4317"
+        # New Relic ingest license key
+        # -> Use either "value" or "secretRef" where "secretRef" will precede if both are defined
+        licenseKey:
+          # If you want to create a new secret, provide to the license key as a Helm value.
+          value: ""
+          # If you already have your license key as a secret stored within the same
+          # namespace as this Helm deployment, provide the secret name and the key to
+          # license key.
+          secretRef: null
+            # name: ""
+            # key: ""
+        # Namespaces to filter the gathered telemetry data
+        # -> If nothing is defined, all telemetry data will be sent
+        namespaces: []
 
-    # # If you want to send the namespaced telemetry data from the
-    # # cluster to the accounts of the individual dev teams
-    # # comment in below.
-    # # Dev team 1 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam1:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam1
-    # # Dev team 2 which is responsible for its own apps running
-    # # in a specific namespace.
-    # devteam2:
-    #   endpoint: "otlp.nr-data.net:4317"
-    #   licenseKey:
-    #     value: ""
-    #   namespaces:
-    #     - devteam2
+      # # If you want to send the namespaced telemetry data from the
+      # # cluster to the accounts of the individual dev teams
+      # # comment in below.
+      # # Dev team 1 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam1:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam1
+      # # Dev team 2 which is responsible for its own apps running
+      # # in a specific namespace.
+      # devteam2:
+      #   endpoint: "otlp.nr-data.net:4317"
+      #   licenseKey:
+      #     value: ""
+      #   namespaces:
+      #     - devteam2
 
 ### DEPENDENCY CONFIG ###
 # You can override default values for the dependency helm charts in this section

@@ -46,7 +46,7 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
     {{- if $teamInfo.licenseKey.secretRef }}
@@ -129,7 +129,7 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
       {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
@@ -150,7 +150,7 @@ spec:
         send_batch_size : 800
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
@@ -182,7 +182,7 @@ spec:
           exporters:
             - otlp/opsteam
             # - logging
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
         traces/{{ $teamName }}:
           receivers:
             - otlp

@@ -1,4 +1,4 @@
-{{- if eq .Values.logs.enabled true -}}
+{{- if eq .Values.traces.enabled true -}}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -46,7 +46,7 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- range $teamName, $teamInfo := .Values.deployment.newrelic }}
+  {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
   {{- if eq $teamName "opsteam" }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}

@@ -29,7 +29,7 @@
       {{- end -}}
     {{- end }}
   {{- else -}}
-    {{- range $teamName, $teamInfo := .Values.deployment.newrelic -}}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [DEPLOYMENT]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}
@@ -70,7 +70,7 @@ Traces are enabled. Deployments of OTel collectors are deployed.
       {{- end -}}
     {{- end }}
   {{- else -}}
-    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic -}}
+    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [DAEMONSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}
@@ -111,7 +111,7 @@ Logs are enabled. Daemonset of OTel collectors are deployed.
       {{- end -}}
     {{- end }}
   {{- else -}}
-    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic -}}
+    {{- range $teamName, $teamInfo := .Values.statefulset.newrelic.teams -}}
       {{- if and (ne $teamInfo.endpoint "otlp.nr-data.net:4317") (ne $teamInfo.endpoint "otlp.eu01.nr-data.net:4317") -}}
         {{ fail "ERROR [STATEFULSET]: The given OTLP enpoint is incorrect. Valid values: For US -> otlp.nr-data.net:4317 or for EU -> otlp.eu01.nr-data.net:4317" }}
       {{- end -}}

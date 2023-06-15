@@ -83,7 +83,7 @@ spec:
       {{- end }}
     {{- end }}
   {{- else }}
-    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
+    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
     - name: {{ $teamName }}-endpoint
       value: {{ $teamInfo.endpoint }}
       {{- if $teamInfo.licenseKey.secretRef }}
@@ -244,7 +244,7 @@ spec:
           {{- end }}
         {{- end }}
       {{- else }}
-        {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
+        {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
           {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
@@ -272,13 +272,24 @@ spec:
         send_batch_size : 800
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
           api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
     {{- end }}
       logging:
         verbosity: detailed
@@ -322,7 +333,7 @@ spec:
             # - logging
         {{- end }}
       {{- else }}
-        {{- range $teamName, $teamInfo := .Values.daemonset.newrelic }}
+        {{- range $teamName, $teamInfo := .Values.daemonset.newrelic.teams }}
         logs/{{ $teamName }}:
           receivers:
             - filelog
