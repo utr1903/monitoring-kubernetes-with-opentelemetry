@@ -1,8 +1,8 @@
 # Kubernetes Monitoring with Open Telemetry
 
-This repository is dedicated to provide a quick start to monitor you Kubernetes cluster. It is designed to be as scalable as possible with the further functionality of exporting necessary telemetry data to multiple New Relic accounts.
+This repository is dedicated to provide a quick start to monitor you Kubernetes cluster. It is designed to be as scalable as possible with the further functionality of exporting necessary telemetry data to multiple New Relic accounts. If want to know where the repo is headed, check out the [roadmap](https://github.com/users/utr1903/projects/1/views/2)!
 
-The collection telemetry data (`logs`, `traces` and `metrics`) is achieved per Open Telemetry collectors configured and deployed as following Kubernetes resources:
+The collection of telemetry data (`logs`, `traces` and `metrics`) is achieved per Open Telemetry collectors configured and deployed as following Kubernetes resources:
 
 - Daemonset
 - Deployment
@@ -20,9 +20,14 @@ The daemonset is primarily used to gather the logs of the applications. It uses 
 
 ### Deployment
 
-The deployment is primarily used to gather the traces per the `otlprecevier` and therefore consists of 2 separate deployments as `recevier` and `exporter`. The reason for this is that the traces are mostly to be sampled and sampling works properly only when all the spans of a trace are processed by one collector instance.
+The deployment is primarily used to gather the application traces & metrics per the `otlprecevier` and consists of 2 separate deployments as `recevier` and `sampler`.
 
-The `receiver` collector is responsible for gathering all of the spans from different applications. It will forward these spans per the `loadbalancingexporter` to the `exporter` collector where they will be sampled according to their trace IDs. The `exporter` collector will then flush the sampled spans to necessary New Relic accounts. Please see official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-stateful-collectors) for more!
+The `receiver` collector is responsible of collecting the traces and metrics where
+
+- the metrics are enriched (& filtered if necessary) and will be directly exported to the corresponding New Relic accounts.
+- the traces, on the other hand, are enriched as well but will be exported to the `sampler` collector.
+
+The reason for this is that the traces are mostly to be sampled and sampling works properly only when all the spans of a trace are processed by one collector instance. Therefore, the `loadbalancingexporter` is used to send all spans of a trace to one `sampler` collector instance. After sampling, the `sampler` collector will flush all the spans to necessary New Relic accounts. Please see official Open Telemetry [docs](https://opentelemetry.io/docs/collector/scaling/#scaling-stateful-collectors) for more!
 
 ### Statefulset
 

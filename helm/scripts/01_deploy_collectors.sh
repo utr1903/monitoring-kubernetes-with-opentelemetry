@@ -116,7 +116,7 @@ else
     --create-namespace \
     --namespace ${otelcollectors[namespace]} \
     --set clusterName=$clusterName \
-    --set traces.enabled=false \
+    --set traces.enabled=true \
     --set deployment.ports.prometheus.port=${otelcollectors[deploymentPrometheusPort]} \
     --set deployment.newrelic.teams.opsteam.endpoint=$newrelicOtlpEndpoint \
     --set deployment.newrelic.teams.opsteam.licenseKey.value=$NEWRELIC_LICENSE_KEY \

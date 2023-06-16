@@ -14,11 +14,11 @@ Set name for deployment collectors.
 {{- define "nrotel.deploymentNameReceiver" -}}
 {{- printf "%s-%s" (include "nrotel.deploymentName" .) "rec" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-{{- define "nrotel.deploymentNameExporter" -}}
-{{- printf "%s-%s" (include "nrotel.deploymentName" .) "exp" | trunc 63 | trimSuffix "-" -}}
+{{- define "nrotel.deploymentNameSampler" -}}
+{{- printf "%s-%s" (include "nrotel.deploymentName" .) "smp" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-{{- define "nrotel.headlessServiceNameExporter" -}}
-{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameExporter" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trimSuffix "-" -}}
+{{- define "nrotel.headlessServiceNameSampler" -}}
+{{- printf "%s-%s.%s.%s" (include "nrotel.deploymentNameSampler" .) "collector-headless" .Release.Namespace "svc.cluster.local" | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
