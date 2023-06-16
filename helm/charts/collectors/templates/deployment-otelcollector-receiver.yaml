@@ -46,24 +46,42 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-  {{- if eq $teamName "opsteam" }}
+  {{- if .Values.global.newrelic.enabled }}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
     - name: {{ $teamName }}-endpoint
-      value: {{ $teamInfo.endpoint }}
-    {{- if $teamInfo.licenseKey.secretRef }}
+      value: {{ $.Values.global.newrelic.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ $teamInfo.licenseKey.secretRef.name }}
           key: {{ $teamInfo.licenseKey.secretRef.key }}
-    {{- else if $teamInfo.licenseKey.value }}
+      {{- else if $teamInfo.licenseKey.value }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
+      {{- end }}
     {{- end }}
-  {{- end }}
+  {{- else }}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
+    {{- end }}
   {{- end }}
 
   # Otel configuration
@@ -131,6 +149,43 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+        {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        logs:
+          log_record:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
+        {{- end }}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+        {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        logs:
+          log_record:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
+        {{- end }}
+      {{- end }}
+    {{- end }}
       memory_limiter:
          check_interval: 1s
          limit_percentage: 80
@@ -149,12 +204,25 @@ spec:
         resolver:
           dns:
             hostname: "{{ include "nrotel.headlessServiceNameExporter" . }}"
-      otlp/opsteam:
-        endpoint: ${opsteam-endpoint}
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
-          api-key: ${opsteam-licenseKey}
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- end }}
       logging:
         verbosity: detailed
 
@@ -179,7 +247,9 @@ spec:
           exporters:
             - otlp/opsteam
             # - logging
-        metrics:
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+        metrics/{{ $teamName }}:
           receivers:
             - otlp
           processors:
@@ -187,10 +257,33 @@ spec:
             - k8sattributes
             - attributes
             - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
             - batch
           exporters:
-            - otlp/opsteam
+            - otlp/{{ $teamName }}
             # - logging
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+        metrics/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - cumulativetodelta
+            - k8sattributes
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
+      {{- end }}
         traces:
           receivers:
             - otlp
