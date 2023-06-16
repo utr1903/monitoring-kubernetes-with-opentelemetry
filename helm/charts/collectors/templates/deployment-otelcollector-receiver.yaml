@@ -149,13 +149,13 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
-    {{- if .Values.global.newrelic.enabled }}
-      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
-        {{- if ne (len $teamInfo.namespaces) 0 }}
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        logs:
-          log_record:
+        metrics:
+          datapoint:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
@@ -165,15 +165,15 @@ spec:
             {{- end -}}
           {{- end -}}
             - '{{ $conditionForK8sNamespaceName }}'
+          {{- end }}
         {{- end }}
-      {{- end }}
-    {{- else }}
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-        {{- if ne (len $teamInfo.namespaces) 0 }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        logs:
-          log_record:
+        metrics:
+          datapoint:
           {{ $conditionForK8sNamespaceName := "" -}}
           {{- range $index, $namespace := $teamInfo.namespaces -}}
             {{- if eq $index 0 -}}
@@ -183,9 +183,9 @@ spec:
             {{- end -}}
           {{- end -}}
             - '{{ $conditionForK8sNamespaceName }}'
+          {{- end }}
         {{- end }}
       {{- end }}
-    {{- end }}
       memory_limiter:
          check_interval: 1s
          limit_percentage: 80
