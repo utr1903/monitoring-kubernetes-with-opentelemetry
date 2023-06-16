@@ -72,16 +72,18 @@ global:
 ### DEPLOYMENT CONFIG ###
 # This configuration creates 2 collectors as Kubernetes deployments:
 # - receiver
-# - exporter
+# - sampler
 
 ## Receiver collector
-# It is responsible for gathering the spans from
-# all of the applications and routing them to the exporter collector
-# according to the trace IDs. This methodology guarantees that all of
-# the spans belonging to particular trace will be sent to one instance
-# of a collector which again guarentees a correct sampling.
+# It is responsible for gathering the metrics & spans from all of the applications.
+# Metrics
+# - They will be filtered according to teams and will be exported to each team's
+#   account.
+# Traces
+# - They will be sent to the sampler collector per the loadbalancingexporter
+#   according to the trace IDs.
 
-## Exporter collector
+## Sampler collector
 # It is responsible to:
 # - gather the spans from the receiver collector
 # - sample them

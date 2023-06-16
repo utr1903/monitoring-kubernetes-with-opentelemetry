@@ -2,7 +2,7 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ include "nrotel.deploymentNameExporter" . }}
+  name: {{ include "nrotel.deploymentNameSampler" . }}
   namespace: {{ .Release.Namespace }}
 spec:
 
@@ -118,7 +118,7 @@ spec:
       attributes/self:
         actions:
           - key: otelcollector.type
-            value: deployment-exporter
+            value: deployment-sampler
             action: upsert
           - key: k8s.node.name
             value: $MY_NODE_NAME

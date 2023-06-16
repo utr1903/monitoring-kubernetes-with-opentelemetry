@@ -203,7 +203,7 @@ spec:
               insecure: true
         resolver:
           dns:
-            hostname: "{{ include "nrotel.headlessServiceNameExporter" . }}"
+            hostname: "{{ include "nrotel.headlessServiceNameSampler" . }}"
     {{- if .Values.global.newrelic.enabled }}
       {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
       otlp/{{ $teamName }}:
