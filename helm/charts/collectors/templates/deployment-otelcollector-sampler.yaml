@@ -46,21 +46,41 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: metadata.namespace
-  {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+  {{- if .Values.global.newrelic.enabled }}
+    {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
     - name: {{ $teamName }}-endpoint
-      value: {{ $teamInfo.endpoint }}
-    {{- if $teamInfo.licenseKey.secretRef }}
+      value: {{ $.Values.global.newrelic.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ $teamInfo.licenseKey.secretRef.name }}
           key: {{ $teamInfo.licenseKey.secretRef.key }}
-    {{- else if $teamInfo.licenseKey.value }}
+      {{- else if $teamInfo.licenseKey.value }}
     - name: {{ $teamName }}-licenseKey
       valueFrom:
         secretKeyRef:
           name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
           key: licenseKey
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+    - name: {{ $teamName }}-endpoint
+      value: {{ $teamInfo.endpoint }}
+      {{- if $teamInfo.licenseKey.secretRef }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ $teamInfo.licenseKey.secretRef.name }}
+          key: {{ $teamInfo.licenseKey.secretRef.key }}
+      {{- else if $teamInfo.licenseKey.value }}
+    - name: {{ $teamName }}-licenseKey
+      valueFrom:
+        secretKeyRef:
+          name: {{ include "nrotel.deploymentName" $ }}-{{ $teamName }}
+          key: licenseKey
+      {{- end }}
     {{- end }}
   {{- end }}
 
@@ -94,22 +114,6 @@ spec:
 
     processors:
       cumulativetodelta:
-      k8sattributes:
-        extract:
-          metadata:
-          - k8s.node.name
-          - k8s.namespace.name
-          - k8s.pod.name
-        passthrough: false
-        pod_association:
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.ip
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
-        - sources:
-          - from: connection
       attributes:
         actions:
           - key: k8s.cluster.name
@@ -129,16 +133,42 @@ spec:
           - key: k8s.pod.name
             value: $MY_POD_NAME
             action: upsert
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
-      {{- if ne (len $teamInfo.namespaces) 0 }}
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
       filter/{{ $teamName }}:
         error_mode: ignore
-        metrics:
-          datapoint:
-          {{- range $namespace := $teamInfo.namespaces }}
-            - 'attributes["k8s.namespace.name"] != "{{ $namespace }}"'
+        traces:
+          span:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
           {{- end }}
-      {{- end }}
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+      filter/{{ $teamName }}:
+        error_mode: ignore
+        traces:
+          span:
+          {{ $conditionForK8sNamespaceName := "" -}}
+          {{- range $index, $namespace := $teamInfo.namespaces -}}
+            {{- if eq $index 0 -}}
+              {{- $conditionForK8sNamespaceName = printf "resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $namespace -}}
+            {{ else }}
+              {{- $conditionForK8sNamespaceName = printf "%s and resource.attributes[\"k8s.namespace.name\"] != \"%s\"" $conditionForK8sNamespaceName $namespace -}}
+            {{- end -}}
+          {{- end -}}
+            - '{{ $conditionForK8sNamespaceName }}'
+          {{- end }}
+        {{- end }}
       {{- end }}
       memory_limiter:
          check_interval: 1s
@@ -150,13 +180,24 @@ spec:
         send_batch_size : 800
 
     exporters:
-    {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+    {{- if .Values.global.newrelic.enabled }}
+      {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
       otlp/{{ $teamName }}:
         endpoint: ${env:{{ $teamName }}-endpoint}
         tls:
           insecure: false
         headers:
           api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
+    {{- else }}
+      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+      otlp/{{ $teamName }}:
+        endpoint: ${env:{{ $teamName }}-endpoint}
+        tls:
+          insecure: false
+        headers:
+          api-key: ${env:{{ $teamName }}-licenseKey}
+      {{- end }}
     {{- end }}
       logging:
         verbosity: detailed
@@ -174,7 +215,6 @@ spec:
             - prometheus/self
           processors:
             - cumulativetodelta
-            - k8sattributes
             - attributes
             - attributes/self
             - memory_limiter
@@ -182,12 +222,12 @@ spec:
           exporters:
             - otlp/opsteam
             # - logging
-      {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+      {{- if .Values.global.newrelic.enabled }}
+        {{- range $teamName, $teamInfo := .Values.global.newrelic.teams }}
         traces/{{ $teamName }}:
           receivers:
             - otlp
           processors:
-            - k8sattributes
             - attributes
             - memory_limiter
           {{- if ne (len $teamInfo.namespaces) 0 }}
@@ -197,6 +237,23 @@ spec:
           exporters:
             - otlp/{{ $teamName }}
             # - logging
+        {{- end }}
+      {{- else }}
+        {{- range $teamName, $teamInfo := .Values.deployment.newrelic.teams }}
+        traces/{{ $teamName }}:
+          receivers:
+            - otlp
+          processors:
+            - attributes
+            - memory_limiter
+          {{- if ne (len $teamInfo.namespaces) 0 }}
+            - filter/{{ $teamName }}
+          {{- end }}
+            - batch
+          exporters:
+            - otlp/{{ $teamName }}
+            # - logging
+        {{- end }}
       {{- end }}
       telemetry:
         # logs:
