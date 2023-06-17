@@ -105,9 +105,9 @@ you can simplify the deployment per the global configuration as follows:
 
 ```yaml
 global:
-  enabled: true
-  endpoint: "OTLP_ENDPOINT_FOR_ALL_ACCOUNTS"
   newrelic:
+    enabled: true
+    endpoint: "OTLP_ENDPOINT_FOR_ALL_ACCOUNTS"
     teams:
       opsteam:
         licenseKey:
