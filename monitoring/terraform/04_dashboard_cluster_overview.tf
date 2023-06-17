@@ -145,7 +145,7 @@ resource "newrelic_one_dashboard" "cluster_overview" {
 
       nrql_query {
         account_id = var.NEW_RELIC_ACCOUNT_ID
-        query      = "SELECT average(node_filesystem_avail_bytes) FROM Metric WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES AUTO"
+        query      = "SELECT average(node_filesystem_size_bytes)-average(node_filesystem_avail_bytes) FROM Metric WHERE instrumentation.provider = 'opentelemetry' AND k8s.cluster.name = '${var.cluster_name}' AND service.name = 'kubernetes-node-exporter' AND k8s.node.name IN ({{nodes}}) FACET k8s.node.name TIMESERIES AUTO"
       }
     }
 
